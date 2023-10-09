@@ -1,0 +1,14 @@
+name: PIA_Tool_Test
+title: PIA_Tool_Test
+username:
+account: trpa
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4161558
+bundleId: 7054531
+url: https://trpa.shinyapps.io/PIA_Tool_Test/
+when: 1680729048.6724
+lastSyncTime: 1680729048.67242
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app_04052023.R|app_backup_6_17__21_11_am.R|app_JS.R|app_old.R

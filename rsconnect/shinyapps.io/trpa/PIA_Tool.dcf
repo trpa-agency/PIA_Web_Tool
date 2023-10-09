@@ -1,0 +1,13 @@
+name: PIA_Tool
+title: PIA_Tool
+username:
+account: trpa
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4286084
+bundleId: 7054579
+url: https://trpa.shinyapps.io/PIA_Tool/
+when: 1680729774.72896
+lastSyncTime: 1680729774.72898
+asMultiple: FALSE
+asStatic: FALSE
