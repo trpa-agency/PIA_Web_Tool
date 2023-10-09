@@ -104,12 +104,24 @@ boundary_fs_url = "Boundaries/FeatureServer/4/query"
 jurisdition_fs_url = "Boundaries/FeatureServer/10/query"
 
 boundary<-feature_service_return(trpa_rest_service_url, boundary_fs_url)
+
+#Our jurisdiction feature service isn't clipped to the basin - should we deal with this or just use the static one?
 jurisdictions<-feature_service_return(trpa_rest_service_url, jurisdition_fs_url)
 
 jur<-jurisdictions%>%
-  mutate(name=case_when(COUNTY == "CSLT" ~ "South Lake Tahoe",
-                        COUNTY == "CARSON" ~ "Carson",
+  mutate(name=case_when(JURISDICTION == "City of South Lake Tahoe" ~ "South Lake Tahoe",
+                        JURISDICTION == "Carson City" ~ "Carson City County",
+                        TRUE ~ as.character(paste(toTitleCase(tolower(JURISDICTION)), "County", sep=" "))))
+
+#COMMENT ONE OF THESE TWO OUT
+jur <- st_read(".", "jurisdictions")%>% st_as_sf()  %>%
+  st_transform(crs=4326) %>%
+  mutate(name=case_when(COUNTY == "CSLT" ~ "South Lake Tahoe", 
+                        COUNTY == "CARSON" ~ "Carson", 
                         TRUE ~ as.character(paste(toTitleCase(tolower(COUNTY)), "County", sep=" "))))
+
+
+
 
 
 trip_rates<- read_excel("Commercial_Assessment_MC_2.0.xlsx", sheet="list_clean1") %>%
@@ -370,7 +382,7 @@ ui <- dashboardPage(skin="black",
                               tabName = "guide",icon = icon("info"))),
                    box(width=12,background="black",
                                  img(src='zoom_background_50th.jpg',  height = 250, width = 250),
-                                 p(tags$br(),HTML("The tool provides initial screening for all project types and more detailed analysis for residential, tourist accommodation unit, and public service projects.  All non-screened commercial, recreation, and other projects will need to complete a more detailed transportation analysis.<br> <br> Follow the steps below to analyze your project. For detailed information on the PIA  framework, tool usage, and calculations select the User Guidelines tab. For questions about the project impact assessment process contact Melanie Sloan (msloan@trpa.gov). For technical issues with the tool contact Josh Schmid (jschmid@trpa.gov). <br> <br>
+                                 p(tags$br(),HTML("The tool provides initial screening for all project types and more detailed analysis for residential, tourist accommodation unit, and public service projects.  All non-screened commercial, recreation, and other projects will need to complete a more detailed transportation analysis.<br> <br> Follow the steps below to analyze your project. For detailed information on the PIA  framework, tool usage, and calculations select the User Guidelines tab. For questions about the project impact assessment process contact Michelle Glickert (mglickert@trpa.gov). For technical issues with the tool contact Josh Schmid (jschmid@trpa.gov). <br> <br>
                         1) Select your project type from the dropdown.<br>
                         2) Click on your project location on the map. <br>
                         3) Enter the number of proposed units<br>
