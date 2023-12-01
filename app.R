@@ -45,7 +45,7 @@ mitigation_spreadsheet <- read_excel("Review of CAPCOA Mitigations.xlsx", sheet=
 url <- parse_url("https://maps.trpa.org/server/rest/services/")
 url$path <- paste(url$path, "Parcels/FeatureServer/0/query", sep = "/")
 url$query <- list(where = "1=1",
-                  
+                  outfields = 'APN',
                   returnGeometry = "true",
                   f = "geojson")
 request <- build_url(url)
@@ -106,12 +106,12 @@ jurisdition_fs_url = "Boundaries/FeatureServer/10/query"
 boundary<-feature_service_return(trpa_rest_service_url, boundary_fs_url)
 
 #Our jurisdiction feature service isn't clipped to the basin - should we deal with this or just use the static one?
-jurisdictions<-feature_service_return(trpa_rest_service_url, jurisdition_fs_url)
+#jurisdictions<-feature_service_return(trpa_rest_service_url, jurisdition_fs_url)
 
-jur<-jurisdictions%>%
-  mutate(name=case_when(JURISDICTION == "City of South Lake Tahoe" ~ "South Lake Tahoe",
-                        JURISDICTION == "Carson City" ~ "Carson City County",
-                        TRUE ~ as.character(paste(toTitleCase(tolower(JURISDICTION)), "County", sep=" "))))
+#jur<-jurisdictions%>%
+#  mutate(name=case_when(JURISDICTION == "City of South Lake Tahoe" ~ "South Lake Tahoe",
+#                        JURISDICTION == "Carson City" ~ "Carson City County",
+#                        TRUE ~ as.character(paste(toTitleCase(tolower(JURISDICTION)), "County", sep=" "))))
 
 #COMMENT ONE OF THESE TWO OUT
 jur <- st_read(".", "jurisdictions")%>% st_as_sf()  %>%
