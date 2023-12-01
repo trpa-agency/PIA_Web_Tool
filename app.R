@@ -45,7 +45,7 @@ mitigation_spreadsheet <- read_excel("Review of CAPCOA Mitigations.xlsx", sheet=
 url <- parse_url("https://maps.trpa.org/server/rest/services/")
 url$path <- paste(url$path, "Parcels/FeatureServer/0/query", sep = "/")
 url$query <- list(where = "1=1",
-                  
+                  outfields = 'APN',
                   returnGeometry = "true",
                   f = "geojson")
 request <- build_url(url)

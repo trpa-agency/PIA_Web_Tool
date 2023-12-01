@@ -5,7 +5,10 @@ params:
   output2: NA
   output3: NA
   output4: NA
-  output5: NA
+  output_mob_fee1: NA
+  output_mob_fee2: NA
+  output_mob_fee3: NA
+  output_mob_fee_tot: NA
   output6: NA
   output7: NA
   output8: NA
@@ -97,15 +100,15 @@ cat( paste(formattable::comma(params$output8,2), as.character(params$output_unit
 
 cat(params$output_mu_lu_1, "\n")
 cat(paste(as.character(formattable::comma(params$output_mu_size1,2)),as.character(params$output_units1)),"\n")
-
+cat(params$output_mob_fee1, "\n")
 
 cat(params$output_mu_lu_2, "\n")
 cat(paste(as.character(formattable::comma(params$output_mu_size2,2)),as.character(params$output_units2)),"\n")
-
+cat(params$output_mob_fee2, "\n")
 
 cat(params$output_mu_lu_3, "\n")
 cat(paste(as.character(formattable::comma(params$output_mu_size3,2)),as.character(params$output_units3)),"\n")
-
+cat(params$output_mob_fee3, "\n")
 
 ```
 
@@ -147,6 +150,14 @@ cat(
   "Mitigation Needed", 
   as.character(formattable::comma(params$output4,0)), sep=" - "), 
   "\n")
+
+cat(
+  paste(
+  "Mobility Fee", 
+  params$output_mob_fee_tot, sep=" - "), 
+  "\n")
+
+
 ```
 
 ## Screening
