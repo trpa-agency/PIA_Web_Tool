@@ -1,0 +1,190 @@
+---
+title: "Project Details"
+params:
+  output1: NA
+  output2: NA
+  output3: NA
+  output4: NA
+  output5: NA
+  output6: NA
+  output7: NA
+  output8: NA
+  output9: NA
+  output10: NA
+  output11: NA
+  output_jur: NA
+  output_apn: NA
+  output_mit_names: NA
+  output_screen_message: NULL
+ # output_screen_type: NA
+  output_length: NULL
+  output_zone_id: NULL
+  output_zone_sos: NULL 
+  output_ite: NULL
+  output_redev_vmt: NULL
+  output_proposed_vmt: NULL
+  output_redev_type: NULL
+  output_analysis_type: NULL
+  output_mu_lu_1: NULL
+  output_mu_lu_2: NULL
+  output_mu_lu_3: NULL
+  output_mu_size1: NULL
+  output_mu_size2: NULL
+  output_mu_size3: NULL
+  output_units: NA
+  output_mitigated_vmt: NULL
+  output_units1: NULL
+  output_units2: NULL
+  output_units3: NULL
+  output_note: NA
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+library(formattable)
+library(tidyverse)
+library(scales)
+```
+
+```{r wrap-hook}
+
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+```
+
+The tool provides initial screening for all project types and more detailed analysis for residential, tourist accommodation unit, and public service projects.  All non-screened commercial, recreation, and other projects will need to complete a more detailed transportation analysis. For detailed information on the PIA  framework, tool usage, and calculations see the User Guidelines. For detailed information on the PIA  framework, tool usage, and calculations select the User Guidelines tab. For questions about the project impact assessment process contact Melanie Sloan (msloan@trpa.gov). For technical issues with the tool contact Reid Haefer (rhaefer@trpa.gov). 
+
+## Date Submitted
+
+```{r, echo=F}
+cat(date())
+```
+
+## Report Notes
+
+```{r, echo=F, linewidth=90}
+cat(params$output_note)
+```
+
+## Analysis Type
+
+```{r, echo=F, linewidth=90}
+cat(params$output_analysis_type)
+```
+
+## Existing Land Use
+
+```{r, echo=F}
+cat(params$output_redev_type, "\n")
+```
+
+## Proposed Project
+
+```{r, echo=F}
+cat(params$output6, "\n")
+cat(params$output7, "\n")
+cat( paste(formattable::comma(params$output8,2), as.character(params$output_units)) , "\n")
+
+
+cat(params$output_mu_lu_1, "\n")
+cat(paste(as.character(formattable::comma(params$output_mu_size1,2)),as.character(params$output_units1)),"\n")
+
+
+cat(params$output_mu_lu_2, "\n")
+cat(paste(as.character(formattable::comma(params$output_mu_size2,2)),as.character(params$output_units2)),"\n")
+
+
+cat(params$output_mu_lu_3, "\n")
+cat(paste(as.character(formattable::comma(params$output_mu_size3,2)),as.character(params$output_units3)),"\n")
+
+
+```
+
+## VMT 
+
+```{r, echo=F}
+cat(
+  paste(
+  "Proposed Project Gross VMT", 
+  as.character(formattable::comma(params$output_proposed_vmt,0)), sep=" - "), 
+  "\n")
+
+cat(
+  paste(
+  "Existing VMT", 
+  as.character(formattable::comma(params$output_redev_vmt,0)), sep=" - "), 
+  "\n")
+
+cat(
+  paste(
+  "Mitigated VMT",
+  as.character(formattable::comma(params$output_mitigated_vmt,0)), sep=" - "),
+  "\n")
+
+cat(
+  paste(
+  "Project Total Net VMT", 
+  as.character(formattable::comma(params$output2,0)), sep=" - "), 
+  "\n")
+
+cat(
+  paste(
+  "Standard of Significance VMT", 
+  as.character(formattable::comma(params$output3,0)), sep=" - "), 
+  "\n")
+
+cat(
+  paste(
+  "Mitigation Needed", 
+  as.character(formattable::comma(params$output4,0)), sep=" - "), 
+  "\n")
+```
+
+## Screening
+
+```{r, echo=F}
+cat(paste("Screened",params$output1, sep=" - "), "\n")
+#cat("Screen Type",params$output_screen_type, "\n")
+```
+
+## Additional Analysis Required?
+
+```{r, echo=F, linewidth=90}
+cat(params$output_screen_message, "\n")
+```
+
+## Mitgation Info
+
+```{r, echo=F, linewidth=90}
+
+cat(paste("Mitigations",params$output_mit_names, sep=" - "), "\n")
+
+cat(paste("Percent",params$output9, sep=" - "), "\n")
+```
+
+## Other Project Details
+
+```{r, echo=F}
+cat(paste("Zone ID",params$output_zone_id, sep=" - "), "\n")
+cat(paste("Zone Average Trip Length",round(params$output_length,2), sep=" - "), "\n")
+cat(paste("ITE Trip Rate (if applicable)",params$output_ite, sep=" - "), "\n")
+cat(paste("Zone VMT Per Capita Standard of Significance",round(params$output_zone_sos,2), sep=" - "), "\n")
+cat(paste("Located in Town/Regional Center",params$output10, sep=" - "), "\n")
+cat(paste("Located in Bonus Unit Eligible Area",params$output11, sep=" - "), "\n")
+cat(paste("Jurisdiction",params$output_jur, sep=" - "), "\n")
+cat(paste("Parcel Number (APN)",params$output_apn, sep=" - "), "\n")
+```
+
+
+
+
+
