@@ -31,6 +31,7 @@ library(httr)
 library(jsonlite)
 #### load data ####
 
+vmt_rate = 225.4
 #read_csv("H:\\scratch\\Forecast_2045_PIA_Zones.csv")
 
 #pm_sf<-st_read(dsn=".", "parcel_master_5_25_21") %>%
@@ -2285,13 +2286,13 @@ output$mitigate3 <-renderValueBox({
 })
 mob_fee_calc <- reactive({
   if(input$proj_type %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-  {(round(display_vmt(),0) * .9) * 218
+  {(round(display_vmt(),0) * .9) * vmt_rate
     }else if(!input$proj_type %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-    {(round(display_vmt(),0)*.1) * 218
+    {(round(display_vmt(),0)*.1) * vmt_rate
     }else if(land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-    {(round(display_vmt(),0) * .9) * 218
+    {(round(display_vmt(),0) * .9) * vmt_rate
     } else if(!input$land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-    {(round(display_vmt(),0)*.1) * 218
+    {(round(display_vmt(),0)*.1) * vmt_rate
     }
 })
 mob_fee_calc2 <- reactive({
@@ -2299,9 +2300,9 @@ mob_fee_calc2 <- reactive({
     return()
   }
   else if(input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-  {(round(display_vmt2(),0) *.9) * 218
+  {(round(display_vmt2(),0) *.9) * vmt_rate
   }else{
-    (round(display_vmt2(),0)*.1) * 218
+    (round(display_vmt2(),0)*.1) * vmt_rate
   }
 })
 mob_fee_calc3 <- reactive({
@@ -2309,9 +2310,9 @@ mob_fee_calc3 <- reactive({
     return()
   }
   else if(input$land_use3 %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-  {(round(display_vmt3(),0)*.9) * 218
+  {(round(display_vmt3(),0)*.9) * vmt_rate
   }else{
-    (round(display_vmt3(),0)*.1) * 218
+    (round(display_vmt3(),0)*.1) * vmt_rate
   }
 })
 output$mobility_fee <-renderValueBox({
