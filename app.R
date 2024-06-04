@@ -2285,15 +2285,17 @@ output$mitigate3 <-renderValueBox({
   )
 })
 mob_fee_calc <- reactive({
-  if(input$proj_type %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-  {(round(display_vmt(),0) * .9) * vmt_rate
-    }else if(!input$proj_type %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-    {(round(display_vmt(),0)*.1) * vmt_rate
-    }else if(land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-    {(round(display_vmt(),0) * .9) * vmt_rate
-    } else if(!input$land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-    {(round(display_vmt(),0)*.1) * vmt_rate
-    }
+  vmt <- round(display_vmt(), 0)
+  
+  if (input$proj_type %in% c("Residential (Market-Rate)", "Residential (Affordable)", "Hotel", "Motel", "Timeshare", "Developed Campground/RV Park")) {
+    return(vmt * 0.9 * vmt_rate)
+  } else if (input$proj_type != "Mixed-Use") {
+    return(vmt * 0.1 * vmt_rate)
+  } else if (input$land_use1 %in% c("Residential (Market-Rate)", "Residential (Affordable)", "Hotel", "Motel", "Timeshare", "Developed Campground/RV Park")) {
+    return(vmt * 0.9 * vmt_rate)
+  } else {
+    return(vmt * 0.1 * vmt_rate)
+  }
 })
 mob_fee_calc2 <- reactive({
   if(input$proj_type !='Mixed-Use'){
