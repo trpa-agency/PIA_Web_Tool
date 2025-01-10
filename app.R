@@ -32,6 +32,9 @@ library(jsonlite)
 #### load data ####
 
 vmt_rate = 225.4
+#Change to 230.14
+commercial_vmt_rate = 23.01
+residential_vmt_rate = 207.13
 #read_csv("H:\\scratch\\Forecast_2045_PIA_Zones.csv")
 
 #pm_sf<-st_read(dsn=".", "parcel_master_5_25_21") %>%
@@ -125,7 +128,7 @@ jur <- st_read(".", "jurisdictions")%>% st_as_sf()  %>%
 
 
 
-trip_rates<- read_excel("Commercial_Assessment_MC_2.0.xlsx", sheet="list_clean1") %>%
+trip_rates<- read_excel("Commercial_Assessment_MC_2.1.xlsx", sheet="list_clean1") %>%
   filter(!use %in% c("Single-Family Detached","Senior Adult Housing – Attached","Congregate Care Facility (Residential Care)", "Multi-Family (low-rise, one or two levels)")) %>%
   filter(!is.na(Rate))
 
@@ -383,7 +386,7 @@ ui <- dashboardPage(skin="black",
                               tabName = "guide",icon = icon("info"))),
                    box(width=12,background="black",
                                  img(src='zoom_background_50th.jpg',  height = 250, width = 250),
-                                 p(tags$br(),HTML("The tool provides initial screening for all project types and more detailed analysis for residential, tourist accommodation unit, and public service projects.  All non-screened commercial, recreation, and other projects will need to complete a more detailed transportation analysis.<br> <br> Follow the steps below to analyze your project. For detailed information on the PIA  framework, tool usage, and calculations select the User Guidelines tab. For questions about the project impact assessment process contact Michelle Glickert (mglickert@trpa.gov). For technical issues with the tool contact Josh Schmid (jschmid@trpa.gov). <br> <br>
+                                 p(tags$br(),HTML("The tool provides initial screening for all project types and more detailed analysis for residential, tourist accommodation unit, and public service projects.  All non-screened commercial, recreation, and other projects will need to complete a more detailed transportation analysis.<br> <br> Follow the steps below to analyze your project. For detailed information on the PIA  framework, tool usage, and calculations select the User Guidelines tab. For questions about the project impact assessment process contact Michelle Glickert (mglickert@trpa.gov). For technical issues with the tool contact Andrew McClary (amcclary@trpa.gov). <br> <br>
                         1) Select your project type from the dropdown.<br>
                         2) Click on your project location on the map. <br>
                         3) Enter the number of proposed units<br>
@@ -2288,13 +2291,13 @@ mob_fee_calc <- reactive({
   vmt <- round(display_vmt(), 0)
   
   if (input$proj_type %in% c("Residential (Market-Rate)", "Residential (Affordable)", "Hotel", "Motel", "Timeshare", "Developed Campground/RV Park")) {
-    return(vmt * 0.9 * vmt_rate)
+    return(vmt * residential_vmt_rate)
   } else if (input$proj_type != "Mixed-Use") {
-    return(vmt * 0.1 * vmt_rate)
+    return(vmt * commercial_vmt_rate)
   } else if (input$land_use1 %in% c("Residential (Market-Rate)", "Residential (Affordable)", "Hotel", "Motel", "Timeshare", "Developed Campground/RV Park")) {
-    return(vmt * 0.9 * vmt_rate)
+    return(vmt * residential_vmt_rate)
   } else {
-    return(vmt * 0.1 * vmt_rate)
+    return(vmt * commercial_vmt_rate)
   }
 })
 mob_fee_calc2 <- reactive({
@@ -2302,9 +2305,9 @@ mob_fee_calc2 <- reactive({
     return()
   }
   else if(input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-  {(round(display_vmt2(),0) *.9) * vmt_rate
+  {(round(display_vmt2(),0) *residential_vmt_rate)
   }else{
-    (round(display_vmt2(),0)*.1) * vmt_rate
+    (round(display_vmt2(),0)*commercial_vmt_rate)
   }
 })
 mob_fee_calc3 <- reactive({
@@ -2312,9 +2315,9 @@ mob_fee_calc3 <- reactive({
     return()
   }
   else if(input$land_use3 %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-  {(round(display_vmt3(),0)*.9) * vmt_rate
+  {(round(display_vmt3(),0)*residential_vmt_rate)
   }else{
-    (round(display_vmt3(),0)*.1) * vmt_rate
+    (round(display_vmt3(),0)*commercial_vmt_rate)
   }
 })
 output$mobility_fee <-renderValueBox({
