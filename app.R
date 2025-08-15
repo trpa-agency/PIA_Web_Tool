@@ -29,6 +29,7 @@ library(shinyalert)
 library(vctrs)
 library(httr)
 library(jsonlite)
+library(bslib)
 #### load data ####
 
 vmt_rate = 225.4
@@ -376,7 +377,9 @@ pub_serv_types <- c("Hospital", "Library","High School","Middle School/Junior Hi
 
 #### --------------------------- ####
 
-ui <- dashboardPage(skin="black", 
+ui <- tagList(tags$head(
+  tags$link(rel = "shortcut icon", href = "favicon.ico")
+), dashboardPage( skin="black", 
   dashboardHeader(title="Project Impact Analysis (PIA) Tool", titleWidth = 550),
   dashboardSidebar(width=300,
                    sidebarMenu(id = "tab",
@@ -464,7 +467,7 @@ ui <- dashboardPage(skin="black",
                uiOutput("guidelines"))
            )
    ))
-)
+))
 server <- function(input, output,session) {
   observeEvent(input$resetAll, {
     reset("reset_div")
@@ -2227,6 +2230,9 @@ output$proj_sos3 <-renderValueBox({
            )
   )
 })
+
+
+
 output$screened <-renderValueBox({
   valueBox(subtitle="Screened", width=6, color="black",
            value=tags$p(screened(),
@@ -2245,27 +2251,24 @@ output$screened3 <-renderValueBox({
                         style = "font-size: 75%;")
   )
 })
-mit_needed <- reactive({
-  if(screened() == "Yes" | tot_vmt_react() - proj_sos_react() <1){
-    0
-  }else{
-tot_vmt_react() - proj_sos_react()
-  }
-})
-mit_needed2 <- reactive({
-  if(screened2() == "Yes" | tot_vmt_react2() - proj_sos_react2() <1){
-    0
-  }else{
-    tot_vmt_react2() - proj_sos_react2()
-  }
-})
-mit_needed3 <- reactive({
-  if(screened3() == "Yes" | tot_vmt_react3() - proj_sos_react3() <1){
-    0
-  }else{
-    tot_vmt_react3() - proj_sos_react3()
-  }
-})
+
+make_mit_needed <- function(screened_func, tot_vmt_func, proj_sos_func) {
+  reactive({
+    req(!is.null(screened_func()), !is.na(screened_func()))
+    req(!is.null(tot_vmt_func()), !is.null(proj_sos_func()))
+    
+    vmt_diff <- tot_vmt_func() - proj_sos_func()
+    if (screened_func() == "Yes" || is.na(vmt_diff) || vmt_diff < 1) {
+      0
+    } else {
+      vmt_diff
+    }
+  })
+}
+mit_needed  <- make_mit_needed(screened,  tot_vmt_react,  proj_sos_react)
+mit_needed2 <- make_mit_needed(screened2, tot_vmt_react2, proj_sos_react2)
+mit_needed3 <- make_mit_needed(screened3, tot_vmt_react3, proj_sos_react3)
+
 output$mitigate <-renderValueBox({
   valueBox(subtitle="VMT Mitigation Needed", width=6, color="navy",
            value= tags$p(
