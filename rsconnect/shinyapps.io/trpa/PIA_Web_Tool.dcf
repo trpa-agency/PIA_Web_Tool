@@ -1,0 +1,12 @@
+name: PIA_Web_Tool
+title: PIA_Web_Tool
+username: trpa
+account: trpa
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 15485048
+bundleId: 10924182
+url: https://trpa.shinyapps.io/PIA_Web_Tool/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

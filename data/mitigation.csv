@@ -1,0 +1,16 @@
+﻿Strategy,CAPCOA Code,Strategy Title,Max ,Difference,Units,Trips,LU,Criteria,Notes,CAPCOA
+Parking ,PDT-2,Unbundle Parking Costs from Property Cost,0.026,,Parking Cost,all,All,,This project will unbundle parking costs from property costs.Parking will be priced separately from home rents/purchase prices or office leases.,
+Commuter Trip ,TRT-1, Implement CTR Program - Voluntary,0.052,TRIA uses 1.86% reduction,% employees eligible,employee @ 10% of total ,Office/Recreation/TAU,"Office: % eligible * 5.2%
+Recreation/Commericial/TAU: % eligible * 5.2% *10%",To what extent should we sepearte out the individual parts? LA has secure bikes/Showers sepearte? Does this really work for most small commercial? ,
+Commuter Trip ,TRT-2,Implement CTR Program -  Required Implementation/Monitoring,0.21,"max % reduction allowed, per CAPCOA",% employees eligible,employee @ 10% of total ,Office/Recreation/TAU,"Office: % eligible * 20.%
+Recreation/Commericial/TAU: % eligible * 20% *10%",cannot be used to with trt1 - voluntary,
+Commuter Trip ,TRT-5,End of Trip Facilities,0.00625,,Binary ,employee @ 10% of total ,TAU/Commercial/Office,"showers, secure bicycle lockers, and changing spaces",cannot be combined with TRT1 or TRT2,
+Commuter Trip ,TRT-6,Telecommute,0.045,"4.5% of staff equals 25%; extend CAPCOA and scale:  9% for 50% of office, 13.5% for 75%, and 18% for 100%.",% employees eligible,All,Office,25% of staff telecommuting 3 days every 2 weeks,"Does this really work for most small commercial? Seems like this could be expanded to more than 25% of staff and scaled, e.g. 9% for 50% of office, 13.5% for 75%, and 18% for 100%. But its not in the CAPCOA doc. 4.5 is F&P adjusted version of CAPCOA 5%.  MS: agree; propose a scaling based off of 25% = 4.5%",
+Commuter Trip ,TRT-11,Shuttle,0.05,expand CAPCOA mitigation for employee only to all trip types of residential and TAU,"% employees eligible (office, industrial, mixed use); residential & TAU assumes 100% eligibility/participation",employee @ 10% of total ,"office, industrial, and mixed-use projects, or Residential and TAU",6.7,"use lower range of effectivenness, 10% and % eleible and * 0.67; A vanpool will usually service employees’ commute to work while a shuttle will service nearby transit stations and surrounding commercial centers.",
+Miscellaneous,SDT-2,Traffic Calming,0.01,CAPCOA applies for area wide; recommend including at project site,# of streets & # of intersections,All,All,"Traffic calming features may include: marked crosswalks, count-down signal timers, curb extensions, speed tables, raised crosswalks, raised intersections, median islands, tight corner radii, roundabouts or mini-circles, on-street parking, planter strips with street trees, chicanes/chokers, and others. Strategy only applies to bicycle facilities that provide a dedicated lane for bicyclists or a completely separated right-of-way for bicycles and pedestrians.",max reduction possible per CAPCOA,
+,,,,,,,,,,
+,,,,,,,,,,
+Aggregation ,,,,,,,,,,
+Max Aggregation ,,,,,,,,,,
+,,0.2,,,,,,,,
+,,0.15,,,,,,,,

@@ -17,51 +17,102 @@ library(shinyjs)
 library(foreign)
 library(rmarkdown)
 library(knitr)
-library(formattable)
 library(leafem)
 library(tools)
 library(leafgl)
 library(mapview)
 library(rmapshaper)
 library(leaflet.esri)
-library(readxl)
 library(shinyalert)
 library(vctrs)
 library(httr)
 library(jsonlite)
 library(bslib)
-#### load data ####
 
 vmt_rate = 225.4
 #Change to 230.14
 commercial_vmt_rate = 23.01
 residential_vmt_rate = 207.13
-#read_csv("H:\\scratch\\Forecast_2045_PIA_Zones.csv")
-
-#pm_sf<-st_read(dsn=".", "parcel_master_5_25_21") %>%
-  #st_transform(crs=4326) 
-
-mitigation_spreadsheet <- read_excel("Review of CAPCOA Mitigations.xlsx", sheet="Include")
-
-#zipF<- "pm_6_7_21.zip"
-#outDir<-getwd()
-#unzip(zipF,exdir=outDir)
-
-url <- parse_url("https://maps.trpa.org/server/rest/services/")
-url$path <- paste(url$path, "Parcels/FeatureServer/0/query", sep = "/")
-url$query <- list(where = "1=1",
-                  outfields = 'APN',
-                  returnGeometry = "true",
-                  f = "geojson")
-request <- build_url(url)
-
-parcels <- st_read(request)
 
 
+# ---- Configuration ----
+trpa_rest_service_url <- "https://maps.trpa.org/server/rest/services/"
+boundary_fs_url      <- "Boundaries/FeatureServer/4/query"
+jurisdiction_fs_url  <- "Boundaries/FeatureServer/10/query"
+pia_zone_url         <- "Transportation_Planning/MapServer/9/query"
+parcels_fs_url       <- "Parcels/FeatureServer/0/query"
 
-pb_sf<- parcels %>% st_as_sf(crs=4326)%>%
+data_dir <- "data"
+if (!dir.exists(data_dir)) dir.create(data_dir, recursive = TRUE)
+
+# ---- feature service reader ----
+feature_service_return <- function(fs_base_url, fs_url, where = "1=1", outFields = "*", crs = 4326) {
+  url <- parse_url(fs_base_url)
+  url$path <- paste(url$path, fs_url, sep = "/")
+  url$query <- list(where = where, outFields = outFields, returnGeometry = "true", f = "geojson")
+  request <- build_url(url)
+  
+  sf_data <- st_read(request, quiet = TRUE)
+  sf_data <- st_as_sf(sf_data, crs = crs) %>% st_transform(crs = crs)
+  sf_data
+}
+
+# ---- safe caching helper ----
+load_or_download <- function(rds_file, download_fun, reload = FALSE) {
+  rds_path <- file.path(data_dir, rds_file)
+  if (!reload && file.exists(rds_path)) {
+    message("Loading from RDS: ", rds_path)
+    readRDS(rds_path)
+  } else {
+    message("Downloading fresh data for: ", rds_path)
+    dat <- download_fun()
+    saveRDS(dat, rds_path)
+    dat
+  }
+}
+# ---- top-level loader ----
+load_feature_services <- function(reload = FALSE) {
+  parcels <- load_or_download(
+    "parcels.rds",
+    function() feature_service_return(trpa_rest_service_url, parcels_fs_url, outFields = "APN"),
+    reload = reload
+  )
+  
+  boundary <- load_or_download(
+    "boundary.rds",
+    function() feature_service_return(trpa_rest_service_url, boundary_fs_url),
+    reload = reload
+  )
+  
+  jurisdictions <- load_or_download(
+    "jurisdictions.rds",
+    function() feature_service_return(trpa_rest_service_url, jurisdiction_fs_url),
+    reload = reload
+  )
+  
+  pia_zones <- load_or_download(
+    "pia_zones.rds",
+    function() feature_service_return(trpa_rest_service_url, pia_zone_url),
+    reload = reload
+  )
+  
+  list(
+    parcels = parcels,
+    boundary = boundary,
+    jurisdictions = jurisdictions,
+    pia_zones = pia_zones
+  )
+}
+
+
+fs_data <- load_feature_services(reload = FALSE)
+
+
+
+
+pb_sf<- fs_data$parcels %>% st_as_sf(crs=4326)%>%
   st_transform(crs=4326) 
-
+mitigation_spreadsheet <- read_csv("data/mitigation.csv")
 #pb_sf<-st_read(dsn=".", "pm_6_7_21") %>%
 #  st_transform(crs=4326) 
 
@@ -70,45 +121,8 @@ sf_use_s2(FALSE)
   #st_as_sf()
 
 
-#simple_pb <- rmapshaper::ms_simplify(input = as(pb_sf %>% select(APN), 'Spatial')) %>%
-#  st_as_sf()
-
-#simple_pb_cast <- st_cast(simple_pb,"POLYGON")
-
-#leaflet() %>% addPolygons(data=simple_pb_cast, group="Parcels") %>% addTiles() %>% groupOptions("Parcels", zoomLevels = 15:20) 
-
-#leaflet() %>% addEsriFeatureLayer(url="https://maps.trpa.org/server/rest/services/Parcels/MapServer/0") %>% addTiles()
-
-#pm<-read.dbf("H:\\model\\project_level_analysis\\parcel_master2.dbf")
-
-#pm %>% mutate(BEDROOMS=as.character(BEDROOMS)) %>% filter(TRPA_LANDU %in% c("Single Family Residential")) %>% 
- # filter(!BEDROOMS %in% c("<NA>","0","N/A","4   *","<NA>"))  %>%
- # filter(!is.na(BEDROOMS)) %>%
- # mutate(BEDROOMS=as.numeric(BEDROOMS)) %>%
- # summarise(avg_bed=mean(BEDROOMS, na.rm=T))
-feature_service_return<- function(fs_base_url, fs_url){
-  url <- parse_url(fs_base_url)
-  url$path <- paste(url$path, fs_url, sep = "/")
-  url$query <- list(where = "1=1",
-                    outFields = "*",
-                    returnGeometry = "true",
-                    f = "geojson")
-  request <- build_url(url)
-  
-  spatial_df <- st_read(request)
-  
-  
-  
-  spatial_df<- spatial_df %>% st_as_sf(crs=4326)%>%
-    st_transform(crs=4326) 
-  return(spatial_df)
-}
-
-trpa_rest_service_url = "https://maps.trpa.org/server/rest/services/"
-boundary_fs_url = "Boundaries/FeatureServer/4/query"
-jurisdition_fs_url = "Boundaries/FeatureServer/10/query"
-
-boundary<-feature_service_return(trpa_rest_service_url, boundary_fs_url)
+pia_zones<-fs_data$pia_zones %>%
+  mutate(zone_no=extract_numeric(zone_id))
 
 #Our jurisdiction feature service isn't clipped to the basin - should we deal with this or just use the static one?
 #jurisdictions<-feature_service_return(trpa_rest_service_url, jurisdition_fs_url)
@@ -129,23 +143,11 @@ jur <- st_read(".", "jurisdictions")%>% st_as_sf()  %>%
 
 
 
-trip_rates<- read_excel("Commercial_Assessment_MC_2.1.xlsx", sheet="list_clean1") %>%
+trip_rates<- read_csv("data/trip_rates.csv") %>%
   filter(!use %in% c("Single-Family Detached","Senior Adult Housing – Attached","Congregate Care Facility (Residential Care)", "Multi-Family (low-rise, one or two levels)")) %>%
   filter(!is.na(Rate))
 
 
-url <- parse_url("https://maps.trpa.org/server/rest/services/")
-url$path <- paste(url$path, "Transportation_Planning/MapServer/9/query", sep = "/")
-url$query <- list(where = "1=1",
-                  outFields = "*",
-                  returnGeometry = "true",
-                  f = "geojson")
-request <- build_url(url)
-
-pia_zones <- st_read(request)
-
-pia_zones<-pia_zones %>%
-  mutate(zone_no=extract_numeric(zone_id))
 
 res_data<-read_csv("residential_data.csv") %>%
   select(-geometry) %>%
@@ -312,11 +314,11 @@ tc_walk <-tc_walk %>%
 
 transit_buffer<-sf::st_read(".","transit_buffer_2019") %>% st_as_sf() %>%
   sf::st_transform(crs=4326)
-transit_buffer <- st_intersection(transit_buffer, boundary)
+transit_buffer <- st_intersection(transit_buffer, fs_data$boundary)
 
 bonus_boundary <-sf::st_read(".","bonus_unit_boundary") %>% st_as_sf() %>%
   sf::st_transform(crs=4326)
-bonus_boundary <- st_intersection(bonus_boundary, boundary)
+bonus_boundary <- st_intersection(bonus_boundary, fs_data$boundary)
 
 
 length_data_sf$cat1 <- factor(length_data_sf$cat, 
@@ -1564,7 +1566,7 @@ mit_percent_final3<-reactive({
   output$map <- renderLeaflet({
     datasetInput() %>%
       leaflet() %>% addProviderTiles("OpenStreetMap.HOT") %>%
-      addPolygons(data=boundary,color="black",options = pathOptions(interactive = FALSE), fill=F) %>%
+      addPolygons(data=fs_data$boundary,color="black",options = pathOptions(interactive = FALSE), fill=F) %>%
       addPolygons(data=town_reg_half , options = pathOptions(interactive = FALSE), group="Town & Regional Center 1/2 Mile Buffer", fill=F, opacity=1) %>%
       addPolygons(data=jur,options = pathOptions(interactive = FALSE), group="Jurisdictions/Subregions", fillColor = "white",fillOpacity = .5, opacity=1, color="#C6C82C") %>%
       addStaticLabels(data=jur, label=jur$name,group="Jurisdictions/Subregions" ,
@@ -1602,7 +1604,7 @@ mit_percent_final3<-reactive({
     points %>% st_as_sf(crs=4326, coords=c("lon","lat"))
       })
   in_out_region<-reactive({
-    st_intersection(proj_loc(), st_buffer(boundary, 0))
+    st_intersection(proj_loc(), st_buffer(fs_data$boundary, 0))
   })
   town_reg_buffer<-reactive({
     st_intersection(proj_loc(), st_buffer(buffer_parcel_final, 0))
