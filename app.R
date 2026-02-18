@@ -31,8 +31,8 @@ library(bslib)
 
 vmt_rate = 225.4
 #Change to 230.14
-commercial_vmt_rate = 23.01
-residential_vmt_rate = 207.13
+commercial_vmt_rate = 23.75
+residential_vmt_rate = 213.76
 
 
 # ---- Configuration ----
