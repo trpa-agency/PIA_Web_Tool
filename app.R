@@ -29,7 +29,7 @@ library(httr)
 library(jsonlite)
 library(bslib)
 
-vmt_rate = 225.4
+vmt_rate = 237.5
 #Change to 230.14
 commercial_vmt_rate = 23.75
 residential_vmt_rate = 213.76
@@ -484,7 +484,7 @@ server <- function(input, output,session) {
     #proj_loc() <- NULL
   #})
   showModal(modalDialog(title = "TRPA Project Impact Analysis Tool",
-                        HTML("<b>Tool Introduction </b><br><br> This tool provides initial screening for all project types and more detailed analysis for residential, tourist accommodation unit, and public service projects.  All non-screened commercial, recreation, and other projects will need to complete a more detailed transportation analysis. The tool is for projects that are generally consistent in size and land use type (i.e., density, mix of uses, transit accessibility, etc.) with the surrounding built environment to where the project is located. For questions about the project impact assessment process contact Melanie Sloan (msloan@trpa.gov). For technical issues with the tool contact Josh Schmid (jschmid@trpa.gov). <br><br>
+                        HTML("<b>Tool Introduction </b><br><br> This tool provides initial screening for all project types and more detailed analysis for residential, tourist accommodation unit, and public service projects.  All non-screened commercial, recreation, and other projects will need to complete a more detailed transportation analysis. The tool is for projects that are generally consistent in size and land use type (i.e., density, mix of uses, transit accessibility, etc.) with the surrounding built environment to where the project is located. For questions about the project impact assessment process contact Michelle Glickert (mglickert@trpa.gov). For technical issues with the tool contact Andrew McClary (amcclary@trpa.gov). <br><br>
 <b>Tool Purpose </b><br><br>
 This tool is intended to be used for the following purposes. <br><br>
 1) Project screening
