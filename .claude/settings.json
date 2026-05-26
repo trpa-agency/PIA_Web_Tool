@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python pia_calculator.py)",
+      "Bash(where python *)",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Read(//c/Program Files/ArcGIS/Pro/bin/Python/envs/**)",
+      "Read(//c/Program Files/ArcGIS/**)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('c:/Users/amcclary/Documents/GitHub/PIA_Web_Tool/PIA_Tool.pyt'\\).read\\(\\)\\); print\\('Syntax OK'\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('c:/Users/amcclary/Documents/GitHub/PIA_Web_Tool/compare_pia.py'\\).read\\(\\)\\); print\\('Python OK'\\)\")",
+      "Bash(python -c \"import pandas; print\\('pandas', pandas.__version__\\)\")",
+      "Bash(where Rscript)",
+      "Bash(python compare_pia.py --csv compare_results.csv)",
+      "Bash(python -c ' *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\amcclary\\.claude\\projects\\c--Users-amcclary-Documents-GitHub-PIA-Web-Tool\\memory"
+    ]
+  }
+}

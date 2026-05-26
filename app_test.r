@@ -17,102 +17,47 @@ library(shinyjs)
 library(foreign)
 library(rmarkdown)
 library(knitr)
+library(formattable)
 library(leafem)
 library(tools)
 library(leafgl)
 library(mapview)
 library(rmapshaper)
 library(leaflet.esri)
+library(readxl)
 library(shinyalert)
 library(vctrs)
 library(httr)
 library(jsonlite)
-library(bslib)
+#### load data ####
 
-vmt_rate = 237.5
-#Change to 230.14
-commercial_vmt_rate = 23.75
-residential_vmt_rate = 213.76
+vmt_rate = 225.4
+#read_csv("H:\\scratch\\Forecast_2045_PIA_Zones.csv")
 
+#pm_sf<-st_read(dsn=".", "parcel_master_5_25_21") %>%
+  #st_transform(crs=4326) 
 
-# ---- Configuration ----
-trpa_rest_service_url <- "https://maps.trpa.org/server/rest/services/"
-boundary_fs_url      <- "Boundaries/FeatureServer/4/query"
-jurisdiction_fs_url  <- "Boundaries/FeatureServer/10/query"
-pia_zone_url         <- "Transportation_Planning/MapServer/9/query"
-parcels_fs_url       <- "Parcels/FeatureServer/0/query"
+mitigation_spreadsheet <- read_excel("Review of CAPCOA Mitigations.xlsx", sheet="Include")
 
-data_dir <- "data"
-if (!dir.exists(data_dir)) dir.create(data_dir, recursive = TRUE)
+#zipF<- "pm_6_7_21.zip"
+#outDir<-getwd()
+#unzip(zipF,exdir=outDir)
 
-# ---- feature service reader ----
-feature_service_return <- function(fs_base_url, fs_url, where = "1=1", outFields = "*", crs = 4326) {
-  url <- parse_url(fs_base_url)
-  url$path <- paste(url$path, fs_url, sep = "/")
-  url$query <- list(where = where, outFields = outFields, returnGeometry = "true", f = "geojson")
-  request <- build_url(url)
-  
-  sf_data <- st_read(request, quiet = TRUE)
-  sf_data <- st_as_sf(sf_data, crs = crs) %>% st_transform(crs = crs)
-  sf_data
-}
+url <- parse_url("https://maps.trpa.org/server/rest/services/")
+url$path <- paste(url$path, "Parcels/FeatureServer/0/query", sep = "/")
+url$query <- list(where = "1=1",
+                  outfields = 'APN',
+                  returnGeometry = "true",
+                  f = "geojson")
+request <- build_url(url)
 
-# ---- safe caching helper ----
-load_or_download <- function(rds_file, download_fun, reload = FALSE) {
-  rds_path <- file.path(data_dir, rds_file)
-  if (!reload && file.exists(rds_path)) {
-    message("Loading from RDS: ", rds_path)
-    readRDS(rds_path)
-  } else {
-    message("Downloading fresh data for: ", rds_path)
-    dat <- download_fun()
-    saveRDS(dat, rds_path)
-    dat
-  }
-}
-# ---- top-level loader ----
-load_feature_services <- function(reload = FALSE) {
-  parcels <- load_or_download(
-    "parcels.rds",
-    function() feature_service_return(trpa_rest_service_url, parcels_fs_url, outFields = "APN"),
-    reload = reload
-  )
-  
-  boundary <- load_or_download(
-    "boundary.rds",
-    function() feature_service_return(trpa_rest_service_url, boundary_fs_url),
-    reload = reload
-  )
-  
-  jurisdictions <- load_or_download(
-    "jurisdictions.rds",
-    function() feature_service_return(trpa_rest_service_url, jurisdiction_fs_url),
-    reload = reload
-  )
-  
-  pia_zones <- load_or_download(
-    "pia_zones.rds",
-    function() feature_service_return(trpa_rest_service_url, pia_zone_url),
-    reload = reload
-  )
-  
-  list(
-    parcels = parcels,
-    boundary = boundary,
-    jurisdictions = jurisdictions,
-    pia_zones = pia_zones
-  )
-}
-
-
-fs_data <- load_feature_services(reload = FALSE)
+parcels <- st_read(request)
 
 
 
-
-pb_sf<- fs_data$parcels %>% st_as_sf(crs=4326)%>%
+pb_sf<- parcels %>% st_as_sf(crs=4326)%>%
   st_transform(crs=4326) 
-mitigation_spreadsheet <- read_csv("data/mitigation.csv")
+
 #pb_sf<-st_read(dsn=".", "pm_6_7_21") %>%
 #  st_transform(crs=4326) 
 
@@ -121,8 +66,45 @@ sf_use_s2(FALSE)
   #st_as_sf()
 
 
-pia_zones<-fs_data$pia_zones %>%
-  mutate(zone_no=extract_numeric(zone_id))
+#simple_pb <- rmapshaper::ms_simplify(input = as(pb_sf %>% select(APN), 'Spatial')) %>%
+#  st_as_sf()
+
+#simple_pb_cast <- st_cast(simple_pb,"POLYGON")
+
+#leaflet() %>% addPolygons(data=simple_pb_cast, group="Parcels") %>% addTiles() %>% groupOptions("Parcels", zoomLevels = 15:20) 
+
+#leaflet() %>% addEsriFeatureLayer(url="https://maps.trpa.org/server/rest/services/Parcels/MapServer/0") %>% addTiles()
+
+#pm<-read.dbf("H:\\model\\project_level_analysis\\parcel_master2.dbf")
+
+#pm %>% mutate(BEDROOMS=as.character(BEDROOMS)) %>% filter(TRPA_LANDU %in% c("Single Family Residential")) %>% 
+ # filter(!BEDROOMS %in% c("<NA>","0","N/A","4   *","<NA>"))  %>%
+ # filter(!is.na(BEDROOMS)) %>%
+ # mutate(BEDROOMS=as.numeric(BEDROOMS)) %>%
+ # summarise(avg_bed=mean(BEDROOMS, na.rm=T))
+feature_service_return<- function(fs_base_url, fs_url){
+  url <- parse_url(fs_base_url)
+  url$path <- paste(url$path, fs_url, sep = "/")
+  url$query <- list(where = "1=1",
+                    outFields = "*",
+                    returnGeometry = "true",
+                    f = "geojson")
+  request <- build_url(url)
+  
+  spatial_df <- st_read(request)
+  
+  
+  
+  spatial_df<- spatial_df %>% st_as_sf(crs=4326)%>%
+    st_transform(crs=4326) 
+  return(spatial_df)
+}
+
+trpa_rest_service_url = "https://maps.trpa.org/server/rest/services/"
+boundary_fs_url = "Boundaries/FeatureServer/4/query"
+jurisdition_fs_url = "Boundaries/FeatureServer/10/query"
+
+boundary<-feature_service_return(trpa_rest_service_url, boundary_fs_url)
 
 #Our jurisdiction feature service isn't clipped to the basin - should we deal with this or just use the static one?
 #jurisdictions<-feature_service_return(trpa_rest_service_url, jurisdition_fs_url)
@@ -143,11 +125,23 @@ jur <- st_read(".", "jurisdictions")%>% st_as_sf()  %>%
 
 
 
-trip_rates<- read_csv("data/trip_rates.csv") %>%
+trip_rates<- read_excel("Commercial_Assessment_MC_2.0.xlsx", sheet="list_clean1") %>%
   filter(!use %in% c("Single-Family Detached","Senior Adult Housing – Attached","Congregate Care Facility (Residential Care)", "Multi-Family (low-rise, one or two levels)")) %>%
   filter(!is.na(Rate))
 
 
+url <- parse_url("https://maps.trpa.org/server/rest/services/")
+url$path <- paste(url$path, "Transportation_Planning/MapServer/9/query", sep = "/")
+url$query <- list(where = "1=1",
+                  outFields = "*",
+                  returnGeometry = "true",
+                  f = "geojson")
+request <- build_url(url)
+
+pia_zones <- st_read(request)
+
+pia_zones<-pia_zones %>%
+  mutate(zone_no=extract_numeric(zone_id))
 
 res_data<-read_csv("residential_data.csv") %>%
   select(-geometry) %>%
@@ -314,11 +308,11 @@ tc_walk <-tc_walk %>%
 
 transit_buffer<-sf::st_read(".","transit_buffer_2019") %>% st_as_sf() %>%
   sf::st_transform(crs=4326)
-transit_buffer <- st_intersection(transit_buffer, fs_data$boundary)
+transit_buffer <- st_intersection(transit_buffer, boundary)
 
 bonus_boundary <-sf::st_read(".","bonus_unit_boundary") %>% st_as_sf() %>%
   sf::st_transform(crs=4326)
-bonus_boundary <- st_intersection(bonus_boundary, fs_data$boundary)
+bonus_boundary <- st_intersection(bonus_boundary, boundary)
 
 
 length_data_sf$cat1 <- factor(length_data_sf$cat, 
@@ -379,9 +373,7 @@ pub_serv_types <- c("Hospital", "Library","High School","Middle School/Junior Hi
 
 #### --------------------------- ####
 
-ui <- tagList(tags$head(
-  tags$link(rel = "shortcut icon", href = "favicon.ico")
-), dashboardPage( skin="black", 
+ui <- dashboardPage(skin="black", 
   dashboardHeader(title="Project Impact Analysis (PIA) Tool", titleWidth = 550),
   dashboardSidebar(width=300,
                    sidebarMenu(id = "tab",
@@ -391,7 +383,7 @@ ui <- tagList(tags$head(
                               tabName = "guide",icon = icon("info"))),
                    box(width=12,background="black",
                                  img(src='zoom_background_50th.jpg',  height = 250, width = 250),
-                                 p(tags$br(),HTML("The tool provides initial screening for all project types and more detailed analysis for residential, tourist accommodation unit, and public service projects.  All non-screened commercial, recreation, and other projects will need to complete a more detailed transportation analysis.<br> <br> Follow the steps below to analyze your project. For detailed information on the PIA  framework, tool usage, and calculations select the User Guidelines tab. For questions about the project impact assessment process contact Michelle Glickert (mglickert@trpa.gov). For technical issues with the tool contact Andrew McClary (amcclary@trpa.gov). <br> <br>
+                                 p(tags$br(),HTML("The tool provides initial screening for all project types and more detailed analysis for residential, tourist accommodation unit, and public service projects.  All non-screened commercial, recreation, and other projects will need to complete a more detailed transportation analysis.<br> <br> Follow the steps below to analyze your project. For detailed information on the PIA  framework, tool usage, and calculations select the User Guidelines tab. For questions about the project impact assessment process contact Michelle Glickert (mglickert@trpa.gov). For technical issues with the tool contact Josh Schmid (jschmid@trpa.gov). <br> <br>
                         1) Select your project type from the dropdown.<br>
                         2) Click on your project location on the map. <br>
                         3) Enter the number of proposed units<br>
@@ -469,7 +461,7 @@ ui <- tagList(tags$head(
                uiOutput("guidelines"))
            )
    ))
-))
+)
 server <- function(input, output,session) {
   observeEvent(input$resetAll, {
     reset("reset_div")
@@ -484,7 +476,7 @@ server <- function(input, output,session) {
     #proj_loc() <- NULL
   #})
   showModal(modalDialog(title = "TRPA Project Impact Analysis Tool",
-                        HTML("<b>Tool Introduction </b><br><br> This tool provides initial screening for all project types and more detailed analysis for residential, tourist accommodation unit, and public service projects.  All non-screened commercial, recreation, and other projects will need to complete a more detailed transportation analysis. The tool is for projects that are generally consistent in size and land use type (i.e., density, mix of uses, transit accessibility, etc.) with the surrounding built environment to where the project is located. For questions about the project impact assessment process contact Michelle Glickert (mglickert@trpa.gov). For technical issues with the tool contact Andrew McClary (amcclary@trpa.gov). <br><br>
+                        HTML("<b>Tool Introduction </b><br><br> This tool provides initial screening for all project types and more detailed analysis for residential, tourist accommodation unit, and public service projects.  All non-screened commercial, recreation, and other projects will need to complete a more detailed transportation analysis. The tool is for projects that are generally consistent in size and land use type (i.e., density, mix of uses, transit accessibility, etc.) with the surrounding built environment to where the project is located. For questions about the project impact assessment process contact Melanie Sloan (msloan@trpa.gov). For technical issues with the tool contact Josh Schmid (jschmid@trpa.gov). <br><br>
 <b>Tool Purpose </b><br><br>
 This tool is intended to be used for the following purposes. <br><br>
 1) Project screening
@@ -562,178 +554,45 @@ output$emp_vmt_percent3  <- renderUI({
   req(input$mitigations3 == "Implement CTR Program -  Required Implementation/Monitoring" | input$mitigations3 == "Implement CTR Program - Voluntary" | input$mitigations3 == "Employee Shuttle" | input$mitigations3 == "Private Shuttle")
   sliderInput("employee_vmt3", "Employee Percent (%) of Total VMT (if applicable)" , 0, 100, 0) 
 })
-mit_choice<-reactive({
-  if(input$proj_type %in% c("Residential (Market-Rate)","Residential (Affordable)")){
-    c("Unbundle Parking Costs from Property Cost",
-    "Traffic Calming",
-    "Private Shuttle")
-  }else if(input$proj_type %in% tau_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Private Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  } else if(input$proj_type %in% rec_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$proj_type %in% commercial_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$proj_type %in% office_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$proj_type %in% pub_serv_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle")
-  }else if(input$proj_type == "Unique Project Type" ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Private Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
+get_mit_choice <- function(project_type, tau_types, rec_types, commercial_types, office_types, pub_serv_types) {
+  if(project_type %in% c("Residential (Market-Rate)","Residential (Affordable)")) {
+    return(c("Unbundle Parking Costs from Property Cost", "Traffic Calming", "Private Shuttle"))
+  } else if(project_type %in% tau_types) {
+    return(c("Traffic Calming", "End of Trip Facilities", "Employee Shuttle", "Private Shuttle", 
+             "Implement CTR Program - Voluntary", "Implement CTR Program - Required Implementation/Monitoring"))
+  } else if(project_type %in% rec_types) {
+    return(c("Traffic Calming", "End of Trip Facilities", "Employee Shuttle", 
+             "Implement CTR Program - Voluntary", "Implement CTR Program - Required Implementation/Monitoring"))
+  } else if(project_type %in% commercial_types) {
+    return(c("Traffic Calming", "End of Trip Facilities", "Employee Shuttle", 
+             "Implement CTR Program - Voluntary", "Implement CTR Program - Required Implementation/Monitoring"))
+  } else if(project_type %in% office_types) {
+    return(c("Traffic Calming", "End of Trip Facilities", "Employee Shuttle", 
+             "Implement CTR Program - Voluntary", "Implement CTR Program - Required Implementation/Monitoring"))
+  } else if(project_type %in% pub_serv_types) {
+    return(c("Traffic Calming", "End of Trip Facilities", "Employee Shuttle"))
+  } else if(project_type == "Unique Project Type") {
+    return(c("Traffic Calming", "End of Trip Facilities", "Employee Shuttle", "Private Shuttle", 
+             "Implement CTR Program - Voluntary", "Implement CTR Program - Required Implementation/Monitoring"))
   }
-  })
-mit_choice1<-reactive({
-  if(input$land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)")){
-    c("Unbundle Parking Costs from Property Cost",
-      "Traffic Calming",
-      "Private Shuttle")
-  }else if(input$land_use1 %in% tau_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Private Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  } else if(input$land_use1 %in% rec_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$land_use1 %in% commercial_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$land_use1 %in% office_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$land_use1 %in% pub_serv_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle")
-  }else if(input$land_use1 == "Unique Project Type" ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Private Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }
+}
+
+mit_choice <- reactive({
+  get_mit_choice(input$proj_type, tau_types, rec_types, commercial_types, office_types, pub_serv_types)
 })
-mit_choice2<-reactive({
-  if(input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)")){
-    c("Unbundle Parking Costs from Property Cost",
-      "Traffic Calming",
-      "Private Shuttle")
-  }else if(input$land_use2 %in% tau_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Private Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  } else if(input$land_use2 %in% rec_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$land_use2 %in% commercial_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$land_use2 %in% office_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$land_use2 %in% pub_serv_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle")
-  }else if(input$land_use2 == "Unique Project Type" ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Private Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }
+
+mit_choice1 <- reactive({
+  get_mit_choice(input$land_use1, tau_types, rec_types, commercial_types, office_types, pub_serv_types)
 })
-mit_choice3<-reactive({
-  if(input$land_use3 %in% c("Residential (Market-Rate)","Residential (Affordable)")){
-    c("Unbundle Parking Costs from Property Cost",
-      "Traffic Calming",
-      "Private Shuttle")
-  }else if(input$land_use3 %in% tau_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Private Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  } else if(input$land_use3 %in% rec_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$land_use3 %in% commercial_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$land_use3 %in% office_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }else if(input$land_use3 %in% pub_serv_types ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle")
-  }else if(input$land_use3 == "Unique Project Type" ){
-    c("Traffic Calming",
-      "End of Trip Facilities",
-      "Employee Shuttle",
-      "Private Shuttle",
-      "Implement CTR Program - Voluntary",
-      "Implement CTR Program -  Required Implementation/Monitoring")
-  }
+
+mit_choice2 <- reactive({
+  get_mit_choice(input$land_use2, tau_types, rec_types, commercial_types, office_types, pub_serv_types)
 })
+
+mit_choice3 <- reactive({
+  get_mit_choice(input$land_use3, tau_types, rec_types, commercial_types, office_types, pub_serv_types)
+})
+
   output$ui_mitigations <-  renderUI ({
     req(input$map_shape_click, input$proj_type)
     checkboxGroupInput(inputId="mitigations", label="Select Mitigations", selected="None",
@@ -764,217 +623,145 @@ mit_choice3<-reactive({
       }
   })
   mit_percent <- reactive({
-    if(identical(input$mitigations, c("Traffic Calming"))  == TRUE){ # all types
-      (1-.01)
-    }else if(identical(input$mitigations, c("Unbundle Parking Costs from Property Cost"))  == TRUE){ # residential only
-      (1-.026)
-    } else if(identical(input$mitigations, c("Unbundle Parking Costs from Property Cost", "Traffic Calming")) == TRUE){  # residential only
-      (1-.026) * (1-.01)
-    }else if(identical(input$mitigations, c("Unbundle Parking Costs from Property Cost", "Traffic Calming", "Private Shuttle"))  == TRUE){ # residential only
-      (1-.026) * (1-.01)* (1-(.05 * (1- (input$employee_vmt/100))))
-    } else if(identical(input$mitigations, c("Unbundle Parking Costs from Property Cost",  "Private Shuttle"))  == TRUE){ # residential only
-      (1-.026) *  (1-(.05 * (1- (input$employee_vmt/100))))
-    }  else if(identical(input$mitigations, c( "Traffic Calming", "Private Shuttle"))  == TRUE){ # tau and resident
-       (1-.01)* (1-(.05 * (1- (input$employee_vmt/100))))
-    } else if(identical(input$mitigations, c( "Private Shuttle"))  == TRUE){ # tau and resident
-       (1-(.05 * (1- (input$employee_vmt/100))))
-    }  else if(identical(input$mitigations, c( "Employee Shuttle","Private Shuttle"))  == TRUE){ # tau only
-      (1-(.05 * input$employee_vmt/100)) * (1-(.05 * (1- (input$employee_vmt/100))))
-    } else if(identical(input$mitigations, c("Traffic Calming" ,"Employee Shuttle","Private Shuttle"))  == TRUE){ # tau only
-      (1-(.05 * input$employee_vmt/100)) * (1-(.05 * (1- (input$employee_vmt/100)))) * (1-.01)
-    } else if(identical(input$mitigations, c("Traffic Calming", "Employee Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-      (1-(.05 * input$employee_vmt/100)) * (1-.01)
-    } else if(identical(input$mitigations, c( "Employee Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-      (1-(.05 * input$employee_vmt/100))
-    } else if(identical(input$mitigations, c( "End of Trip Facilities"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625)
-    } else if(identical(input$mitigations, c( "End of Trip Facilities","Employee Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * input$employee_vmt/100))
-    } else if(identical(input$mitigations, c("Traffic Calming","End of Trip Facilities","Employee Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * input$employee_vmt/100)) * (1-.01)
-    }else if(identical(input$mitigations, c("Traffic Calming", "End of Trip Facilities","Employee Shuttle", "Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * input$employee_vmt/100)) * (1-.01) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    }else if(identical(input$mitigations, c("Traffic Calming", "End of Trip Facilities","Employee Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * input$employee_vmt/100)) * (1-.01) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c("Traffic Calming", "End of Trip Facilities","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * input$employee_vmt/100)) * (1-.01) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c("Traffic Calming",  "End of Trip Facilities","Private Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-.01) * (1-(.05 * (1- (input$employee_vmt/100))))
-    }else if(identical(input$mitigations, c("Traffic Calming", "End of Trip Facilities"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-.01)
-    } else if(identical(input$mitigations, c( "End of Trip Facilities", "Private Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * (1- (input$employee_vmt/100))))
-    } else if(identical(input$mitigations, c( "End of Trip Facilities","Employee Shuttle", "Private Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * input$employee_vmt/100)) * (1-(.05 * (1- (input$employee_vmt/100))))
-    } else if(identical(input$mitigations, c("Traffic Calming", "End of Trip Facilities", "Private Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-.01) * (1-(.05 * (1- (input$employee_vmt/100))))
-    }else if(identical(input$mitigations, c( "Traffic Calming","Implement CTR Program - Voluntary"))  == TRUE){ # all types
-      (1-.01) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "Traffic Calming","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # all types
-      (1-.01) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "Traffic Calming", "Private Shuttle", "Implement CTR Program - Voluntary"))  == TRUE){ # tau and resident
-      (1-.01)* (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "Private Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau and resident
-      (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    }  else if(identical(input$mitigations, c( "Employee Shuttle","Private Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau only
-      (1-(.05 * input$employee_vmt/100)) * (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "Employee Shuttle","Private Shuttle","Traffic Calming","Implement CTR Program - Voluntary"))  == TRUE){ # tau only
-      (1-(.05 * input$employee_vmt/100)) * (1-(.05 * (1- (input$employee_vmt/100)))) (1-.01) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c("Traffic Calming","Employee Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-      (1-(.05 * input$employee_vmt/100)) * (1-.01) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "Employee Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-      (1-(.05 * input$employee_vmt/100)) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "End of Trip Facilities","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "End of Trip Facilities","Employee Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * input$employee_vmt/100)) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-   } else if(identical(input$mitigations, c( "Traffic Calming", "End of Trip Facilities","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-.01) *  (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "End of Trip Facilities", "Private Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "End of Trip Facilities","Employee Shuttle", "Private Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * input$employee_vmt/100)) * (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "Traffic Calming", "End of Trip Facilities","Private Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-.01) * (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c("Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-       (1- (.05* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "Traffic Calming", "Private Shuttle", "Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau and resident
-      (1-.01)* (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau and resident
-      (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    }  else if(identical(input$mitigations, c( "Employee Shuttle","Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau only
-      (1-(.05 * input$employee_vmt/100)) * (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c("Traffic Calming", "Employee Shuttle","Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau only
-      (1-(.05 * input$employee_vmt/100)) * (1-(.05 * (1- (input$employee_vmt/100)))) (1-.01) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "Traffic Calming","Employee Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-      (1-(.05 * input$employee_vmt/100)) * (1-.01) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "Employee Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-      (1-(.05 * input$employee_vmt/100)) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "End of Trip Facilities","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "End of Trip Facilities","Employee Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * input$employee_vmt/100)) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c("Traffic Calming", "End of Trip Facilities", "Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-.01) * (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "End of Trip Facilities", "Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "End of Trip Facilities","Employee Shuttle", "Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-(.05 * input$employee_vmt/100)) * (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c("Traffic Calming", "End of Trip Facilities", "Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-      (1-.00625) * (1-.01) * (1-(.05 * (1- (input$employee_vmt/100)))) * (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else if(identical(input$mitigations, c( "Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-      (1- (.21* (input$eligible/100) * (input$employee_vmt/100)))
-    } else{1}
-   })
-mit_percent_final <-reactive({
-  if(mit_percent() < .8 & nrow(town_reg_buffer()) > 0){
-    .8
-  }else if(mit_percent() < .85 & nrow(town_reg_buffer()) == 0){
-    .85
-  } else{mit_percent()}
+    # Initialize variables
+    mitigations <- input$mitigations
+    employee_vmt <- input$employee_vmt / 100
+    eligible <- input$eligible / 100
+
+    # Helper functions to calculate the impact of each mitigation measure
+    traffic_calming <- function() { 1 - 0.01 }
+    unbundle_parking <- function() { 1 - 0.026 }
+    private_shuttle <- function() { 1 - (0.05 * (1 - employee_vmt)) }
+    employee_shuttle <- function() { 1 - (0.05 * employee_vmt) }
+    end_of_trip <- function() { 1 - 0.00625 }
+    ctr_voluntary <- function() { 1 - (0.05 * eligible * employee_vmt) }
+    ctr_required <- function() { 1 - (0.21 * eligible * employee_vmt) }
+
+    # Initialize the mitigation percentage
+    mit_percentage <- 1
+
+    # Apply the appropriate mitigations
+    if ("Traffic Calming" %in% mitigations) {
+        mit_percentage <- mit_percentage * traffic_calming()
+    }
+    if ("Unbundle Parking Costs from Property Cost" %in% mitigations) {
+        mit_percentage <- mit_percentage * unbundle_parking()
+    }
+    if ("Private Shuttle" %in% mitigations) {
+        mit_percentage <- mit_percentage * private_shuttle()
+    }
+    if ("Employee Shuttle" %in% mitigations) {
+        mit_percentage <- mit_percentage * employee_shuttle()
+    }
+    if ("End of Trip Facilities" %in% mitigations) {
+        mit_percentage <- mit_percentage * end_of_trip()
+    }
+    if ("Implement CTR Program - Voluntary" %in% mitigations) {
+        mit_percentage <- mit_percentage * ctr_voluntary()
+    }
+    if ("Implement CTR Program - Required Implementation/Monitoring" %in% mitigations) {
+        mit_percentage <- mit_percentage * ctr_required()
+    }
+
+    return(mit_percentage)
+})
+mit_percent <- reactive({
+    # Initialize variables
+    mitigations <- input$mitigations
+    employee_vmt <- input$employee_vmt / 100
+    eligible <- input$eligible / 100
+
+    # Helper functions to calculate the impact of each mitigation measure
+    traffic_calming <- function() { 1 - 0.01 }
+    unbundle_parking <- function() { 1 - 0.026 }
+    private_shuttle <- function() { 1 - (0.05 * (1 - employee_vmt)) }
+    employee_shuttle <- function() { 1 - (0.05 * employee_vmt) }
+    end_of_trip <- function() { 1 - 0.00625 }
+    ctr_voluntary <- function() { 1 - (0.05 * eligible * employee_vmt) }
+    ctr_required <- function() { 1 - (0.21 * eligible * employee_vmt) }
+
+    # Initialize the mitigation percentage
+    mit_percentage <- 1
+
+    # Apply the appropriate mitigations
+    if ("Traffic Calming" %in% mitigations) {
+        mit_percentage <- mit_percentage * traffic_calming()
+    }
+    if ("Unbundle Parking Costs from Property Cost" %in% mitigations) {
+        mit_percentage <- mit_percentage * unbundle_parking()
+    }
+    if ("Private Shuttle" %in% mitigations) {
+        mit_percentage <- mit_percentage * private_shuttle()
+    }
+    if ("Employee Shuttle" %in% mitigations) {
+        mit_percentage <- mit_percentage * employee_shuttle()
+    }
+    if ("End of Trip Facilities" %in% mitigations) {
+        mit_percentage <- mit_percentage * end_of_trip()
+    }
+    if ("Implement CTR Program - Voluntary" %in% mitigations) {
+        mit_percentage <- mit_percentage * ctr_voluntary()
+    }
+    if ("Implement CTR Program - Required Implementation/Monitoring" %in% mitigations) {
+        mit_percentage <- mit_percentage * ctr_required()
+    }
+
+    return(mit_percentage)
+})
+mit_percent_adjusted <- function(mit_percent_value) {
+  if (mit_percent_value < 0.8 && nrow(town_reg_buffer()) > 0) {
+    return(0.8)
+  } else if (mit_percent_value < 0.85 && nrow(town_reg_buffer()) == 0) {
+    return(0.85)
+  } else {
+    return(mit_percent_value)
+  }
+}
+mit_percent_final <- reactive({
+  mit_percent_adjusted(mit_percent())
 })
 mit_percent1 <- reactive({
-  if(identical(input$mitigations1, c("Traffic Calming"))  == TRUE){ # all types
-    (1-.01)
-  }else if(identical(input$mitigations1, c("Unbundle Parking Costs from Property Cost"))  == TRUE){ # residential only
-    (1-.026)
-  } else if(identical(input$mitigations1, c("Unbundle Parking Costs from Property Cost", "Traffic Calming")) == TRUE){  # residential only
-    (1-.026) * (1-.01)
-  }else if(identical(input$mitigations1, c("Unbundle Parking Costs from Property Cost", "Traffic Calming", "Private Shuttle"))  == TRUE){ # residential only
-    (1-.026) * (1-.01)* (1-(.05 * (1- (input$employee_vmt1/100))))
-  } else if(identical(input$mitigations1, c("Unbundle Parking Costs from Property Cost",  "Private Shuttle"))  == TRUE){ # residential only
-    (1-.026) *  (1-(.05 * (1- (input$employee_vmt1/100))))
-  }  else if(identical(input$mitigations1, c( "Traffic Calming", "Private Shuttle"))  == TRUE){ # tau and resident
-    (1-.01)* (1-(.05 * (1- (input$employee_vmt1/100))))
-  } else if(identical(input$mitigations1, c( "Private Shuttle"))  == TRUE){ # tau and resident
-    (1-(.05 * (1- (input$employee_vmt1/100))))
-  }  else if(identical(input$mitigations1, c( "Employee Shuttle","Private Shuttle"))  == TRUE){ # tau only
-    (1-(.05 * input$employee_vmt1/100)) * (1-(.05 * (1- (input$employee_vmt1/100))))
-  } else if(identical(input$mitigations1, c("Traffic Calming" ,"Employee Shuttle","Private Shuttle"))  == TRUE){ # tau only
-    (1-(.05 * input$employee_vmt1/100)) * (1-(.05 * (1- (input$employee_vmt1/100)))) * (1-.01)
-  } else if(identical(input$mitigations1, c("Traffic Calming", "Employee Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-    (1-(.05 * input$employee_vmt1/100)) * (1-.01)
-  } else if(identical(input$mitigations1, c( "Employee Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-    (1-(.05 * input$employee_vmt1/100))
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625)
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities","Employee Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * input$employee_vmt1/100))
-  } else if(identical(input$mitigations1, c("Traffic Calming","End of Trip Facilities","Employee Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * input$employee_vmt1/100)) * (1-.01)
-  }else if(identical(input$mitigations1, c("Traffic Calming", "End of Trip Facilities","Employee Shuttle", "Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * input$employee_vmt1/100)) * (1-.01) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  }else if(identical(input$mitigations1, c("Traffic Calming", "End of Trip Facilities","Employee Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * input$employee_vmt1/100)) * (1-.01) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c("Traffic Calming", "End of Trip Facilities","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * input$employee_vmt1/100)) * (1-.01) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c("Traffic Calming",  "End of Trip Facilities","Private Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-.01) * (1-(.05 * (1- (input$employee_vmt1/100))))
-  }else if(identical(input$mitigations1, c("Traffic Calming", "End of Trip Facilities"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-.01)
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities", "Private Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * (1- (input$employee_vmt1/100))))
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities","Employee Shuttle", "Private Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * input$employee_vmt1/100)) * (1-(.05 * (1- (input$employee_vmt1/100))))
-  } else if(identical(input$mitigations1, c("Traffic Calming", "End of Trip Facilities", "Private Shuttle"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-.01) * (1-(.05 * (1- (input$employee_vmt1/100))))
-  }else if(identical(input$mitigations1, c( "Traffic Calming","Implement CTR Program - Voluntary"))  == TRUE){ # all types
-    (1-.01) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Traffic Calming","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # all types
-    (1-.01) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Traffic Calming", "Private Shuttle", "Implement CTR Program - Voluntary"))  == TRUE){ # tau and resident
-    (1-.01)* (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Private Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau and resident
-    (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  }  else if(identical(input$mitigations1, c( "Employee Shuttle","Private Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau only
-    (1-(.05 * input$employee_vmt1/100)) * (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Employee Shuttle","Private Shuttle","Traffic Calming","Implement CTR Program - Voluntary"))  == TRUE){ # tau only
-    (1-(.05 * input$employee_vmt1/100)) * (1-(.05 * (1- (input$employee_vmt1/100)))) (1-.01) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c("Traffic Calming","Employee Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-    (1-(.05 * input$employee_vmt1/100)) * (1-.01) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Employee Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-    (1-(.05 * input$employee_vmt1/100)) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities","Employee Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * input$employee_vmt1/100)) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Traffic Calming", "End of Trip Facilities","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-.01) *  (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities", "Private Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities","Employee Shuttle", "Private Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * input$employee_vmt1/100)) * (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Traffic Calming", "End of Trip Facilities","Private Shuttle","Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-.01) * (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c("Implement CTR Program - Voluntary"))  == TRUE){ # tau, rec, commercial, public service
-    (1- (.05* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Traffic Calming", "Private Shuttle", "Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau and resident
-    (1-.01)* (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau and resident
-    (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  }  else if(identical(input$mitigations1, c( "Employee Shuttle","Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau only
-    (1-(.05 * input$employee_vmt1/100)) * (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c("Traffic Calming", "Employee Shuttle","Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau only
-    (1-(.05 * input$employee_vmt1/100)) * (1-(.05 * (1- (input$employee_vmt1/100)))) (1-.01) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Traffic Calming","Employee Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-    (1-(.05 * input$employee_vmt1/100)) * (1-.01) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Employee Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-    (1-(.05 * input$employee_vmt1/100)) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities","Employee Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * input$employee_vmt1/100)) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c("Traffic Calming", "End of Trip Facilities", "Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-.01) * (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities", "Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "End of Trip Facilities","Employee Shuttle", "Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-(.05 * input$employee_vmt1/100)) * (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c("Traffic Calming", "End of Trip Facilities", "Private Shuttle","Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-    (1-.00625) * (1-.01) * (1-(.05 * (1- (input$employee_vmt1/100)))) * (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else if(identical(input$mitigations1, c( "Implement CTR Program -  Required Implementation/Monitoring"))  == TRUE){ # tau, rec, commercial, public service
-    (1- (.21* (input$eligible1/100) * (input$employee_vmt1/100)))
-  } else{1}
+  # Initialize variables
+    mitigations <- input$mitigations1
+    employee_vmt <- input$employee_vmt1 / 100
+    eligible <- input$eligible1 / 100
+
+    # Helper functions to calculate the impact of each mitigation measure
+    traffic_calming <- function() { 1 - 0.01 }
+    unbundle_parking <- function() { 1 - 0.026 }
+    private_shuttle <- function() { 1 - (0.05 * (1 - employee_vmt)) }
+    employee_shuttle <- function() { 1 - (0.05 * employee_vmt) }
+    end_of_trip <- function() { 1 - 0.00625 }
+    ctr_voluntary <- function() { 1 - (0.05 * eligible * employee_vmt) }
+    ctr_required <- function() { 1 - (0.21 * eligible * employee_vmt) }
+
+    # Initialize the mitigation percentage
+    mit_percentage <- 1
+
+    # Apply the appropriate mitigations
+    if ("Traffic Calming" %in% mitigations) {
+        mit_percentage <- mit_percentage * traffic_calming()
+    }
+    if ("Unbundle Parking Costs from Property Cost" %in% mitigations) {
+        mit_percentage <- mit_percentage * unbundle_parking()
+    }
+    if ("Private Shuttle" %in% mitigations) {
+        mit_percentage <- mit_percentage * private_shuttle()
+    }
+    if ("Employee Shuttle" %in% mitigations) {
+        mit_percentage <- mit_percentage * employee_shuttle()
+    }
+    if ("End of Trip Facilities" %in% mitigations) {
+        mit_percentage <- mit_percentage * end_of_trip()
+    }
+    if ("Implement CTR Program - Voluntary" %in% mitigations) {
+        mit_percentage <- mit_percentage * ctr_voluntary()
+    }
+    if ("Implement CTR Program - Required Implementation/Monitoring" %in% mitigations) {
+        mit_percentage <- mit_percentage * ctr_required()
+    }
+
+    return(mit_percentage)
 })
 mit_percent_final1 <-reactive({
   if(mit_percent1() < .8 & nrow(town_reg_buffer()) > 0){
@@ -1566,7 +1353,7 @@ mit_percent_final3<-reactive({
   output$map <- renderLeaflet({
     datasetInput() %>%
       leaflet() %>% addProviderTiles("OpenStreetMap.HOT") %>%
-      addPolygons(data=fs_data$boundary,color="black",options = pathOptions(interactive = FALSE), fill=F) %>%
+      addPolygons(data=boundary,color="black",options = pathOptions(interactive = FALSE), fill=F) %>%
       addPolygons(data=town_reg_half , options = pathOptions(interactive = FALSE), group="Town & Regional Center 1/2 Mile Buffer", fill=F, opacity=1) %>%
       addPolygons(data=jur,options = pathOptions(interactive = FALSE), group="Jurisdictions/Subregions", fillColor = "white",fillOpacity = .5, opacity=1, color="#C6C82C") %>%
       addStaticLabels(data=jur, label=jur$name,group="Jurisdictions/Subregions" ,
@@ -1604,7 +1391,7 @@ mit_percent_final3<-reactive({
     points %>% st_as_sf(crs=4326, coords=c("lon","lat"))
       })
   in_out_region<-reactive({
-    st_intersection(proj_loc(), st_buffer(fs_data$boundary, 0))
+    st_intersection(proj_loc(), st_buffer(boundary, 0))
   })
   town_reg_buffer<-reactive({
     st_intersection(proj_loc(), st_buffer(buffer_parcel_final, 0))
@@ -2232,9 +2019,6 @@ output$proj_sos3 <-renderValueBox({
            )
   )
 })
-
-
-
 output$screened <-renderValueBox({
   valueBox(subtitle="Screened", width=6, color="black",
            value=tags$p(screened(),
@@ -2253,24 +2037,27 @@ output$screened3 <-renderValueBox({
                         style = "font-size: 75%;")
   )
 })
-
-make_mit_needed <- function(screened_func, tot_vmt_func, proj_sos_func) {
-  reactive({
-    req(!is.null(screened_func()), !is.na(screened_func()))
-    req(!is.null(tot_vmt_func()), !is.null(proj_sos_func()))
-    
-    vmt_diff <- tot_vmt_func() - proj_sos_func()
-    if (screened_func() == "Yes" || is.na(vmt_diff) || vmt_diff < 1) {
-      0
-    } else {
-      vmt_diff
-    }
-  })
-}
-mit_needed  <- make_mit_needed(screened,  tot_vmt_react,  proj_sos_react)
-mit_needed2 <- make_mit_needed(screened2, tot_vmt_react2, proj_sos_react2)
-mit_needed3 <- make_mit_needed(screened3, tot_vmt_react3, proj_sos_react3)
-
+mit_needed <- reactive({
+  if(screened() == "Yes" | tot_vmt_react() - proj_sos_react() <1){
+    0
+  }else{
+tot_vmt_react() - proj_sos_react()
+  }
+})
+mit_needed2 <- reactive({
+  if(screened2() == "Yes" | tot_vmt_react2() - proj_sos_react2() <1){
+    0
+  }else{
+    tot_vmt_react2() - proj_sos_react2()
+  }
+})
+mit_needed3 <- reactive({
+  if(screened3() == "Yes" | tot_vmt_react3() - proj_sos_react3() <1){
+    0
+  }else{
+    tot_vmt_react3() - proj_sos_react3()
+  }
+})
 output$mitigate <-renderValueBox({
   valueBox(subtitle="VMT Mitigation Needed", width=6, color="navy",
            value= tags$p(
@@ -2296,13 +2083,13 @@ mob_fee_calc <- reactive({
   vmt <- round(display_vmt(), 0)
   
   if (input$proj_type %in% c("Residential (Market-Rate)", "Residential (Affordable)", "Hotel", "Motel", "Timeshare", "Developed Campground/RV Park")) {
-    return(vmt * residential_vmt_rate)
+    return(vmt * 0.9 * vmt_rate)
   } else if (input$proj_type != "Mixed-Use") {
-    return(vmt * commercial_vmt_rate)
+    return(vmt * 0.1 * vmt_rate)
   } else if (input$land_use1 %in% c("Residential (Market-Rate)", "Residential (Affordable)", "Hotel", "Motel", "Timeshare", "Developed Campground/RV Park")) {
-    return(vmt * residential_vmt_rate)
+    return(vmt * 0.9 * vmt_rate)
   } else {
-    return(vmt * commercial_vmt_rate)
+    return(vmt * 0.1 * vmt_rate)
   }
 })
 mob_fee_calc2 <- reactive({
@@ -2310,9 +2097,9 @@ mob_fee_calc2 <- reactive({
     return()
   }
   else if(input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-  {(round(display_vmt2(),0) *residential_vmt_rate)
+  {(round(display_vmt2(),0) *.9) * vmt_rate
   }else{
-    (round(display_vmt2(),0)*commercial_vmt_rate)
+    (round(display_vmt2(),0)*.1) * vmt_rate
   }
 })
 mob_fee_calc3 <- reactive({
@@ -2320,9 +2107,9 @@ mob_fee_calc3 <- reactive({
     return()
   }
   else if(input$land_use3 %in% c("Residential (Market-Rate)","Residential (Affordable)","Hotel","Motel","Timeshare","Developed Campground/RV Park" ))
-  {(round(display_vmt3(),0)*residential_vmt_rate)
+  {(round(display_vmt3(),0)*.9) * vmt_rate
   }else{
-    (round(display_vmt3(),0)*commercial_vmt_rate)
+    (round(display_vmt3(),0)*.1) * vmt_rate
   }
 })
 output$mobility_fee <-renderValueBox({
