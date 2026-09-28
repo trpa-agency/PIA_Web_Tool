@@ -78,14 +78,14 @@ load_zone_data <- function(analysis_type) {
 # Land-use type sets (mirrors app.R)
 # ---------------------------------------------------------------------------
 KSF_USES <- c(
-  "Auto Parts and Service Center", "General retail", "Furniture Store",
+  "Auto Parts and Service Center", "General Retail", "Furniture Store",
   "Pharmacy/Drugstore", "Supermarket", "Drive-In Bank",
-  "High Turnover Sit-Down Restaurant (<1 hr. turnover)", "Fast Food Restaurant",
-  "Quality Restaurant (>1 hr. turnover)", "Drinking Place",
+  "High Turnover Sit-Down Restaurant (<1 hr. turnover)", "Fast Food Restaurant (without drive-through window)",
+  "Fine Dining, previously Quality Restaurant (>1 hr. turnover)", "Brewery Taproom", "Cannabis Dispensary", "Specialty Trade Contractor",
   "Building Materials/Lumber", "Free-Standing Discount Store",
-  "General Office Building (GFA of more than 5,000 sf)",
-  "Medical –Dental Office Building", "Light industrial", "Warehouse",
-  "Automobile Sales", "Health and Fitness Club",
+  "Office - General Office Building (GFA of more than 10,000 sf)", "Office - Small Office Building (GFA of less than 10,000 sf)",
+  "Medical-Dental Office Building", "General Light Industrial", "Warehouse",
+  "Automobile Sales",
   "Recreational Community Center", "Church", "Daycare Center", "Library", "Hospital"
 )
 
@@ -98,12 +98,11 @@ RESIDENTIAL_FEE_USES <- c(
 
 COMMERCIAL_NO_SOS <- c(
   "Auto Parts and Service Center", "Automobile Sales", "Building Materials/Lumber",
-  "Drinking Place", "Drive-In Bank", "Fast Food Restaurant",
+  "Brewery Taproom", "Cannabis Dispensary", "Specialty Trade Contractor", "Drive-In Bank", "Fast Food Restaurant (without drive-through window)",
   "Free-Standing Discount Store", "Furniture Store",
-  "General Office Building (GFA of more than 5,000 sf)", "General retail",
-  "Health and Fitness Club", "High Turnover Sit-Down Restaurant (<1 hr. turnover)",
-  "Light industrial", "Medical –Dental Office Building", "Pharmacy/Drugstore",
-  "Quality Restaurant (>1 hr. turnover)", "Supermarket", "Warehouse"
+  "Office - General Office Building (GFA of more than 10,000 sf)", "Office - Small Office Building (GFA of less than 10,000 sf)", "General Retail", "High Turnover Sit-Down Restaurant (<1 hr. turnover)",
+  "General Light Industrial", "Medical-Dental Office Building", "Pharmacy/Drugstore",
+  "Fine Dining, previously Quality Restaurant (>1 hr. turnover)", "Supermarket", "Warehouse"
 )
 
 PUBLIC_SERVICE_SOS <- c("Church", "Daycare Center", "Hospital", "Library",
@@ -112,7 +111,7 @@ PUBLIC_SERVICE_SOS <- c("Church", "Daycare Center", "Hospital", "Library",
 NO_SOS_USES <- c("Bowling Alley", "Developed Campground/RV Park", "Golf Course",
                   "Marina", "Movie Theater (traditional)", "Unique Project Type")
 
-SCHOOL_USES <- c("University/College", "High School", "Middle School/Junior High School",
+SCHOOL_USES <- c("Junior/Community College", "High School", "Middle School/Junior High School",
                   "Elementary School", "Private School (K-12)")
 
 # ---------------------------------------------------------------------------

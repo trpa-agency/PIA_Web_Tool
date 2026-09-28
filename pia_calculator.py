@@ -41,21 +41,23 @@ KSF_USES = {
     "Building Materials/Lumber",
     "Church",
     "Daycare Center",
-    "Drinking Place",
+    "Brewery Taproom",
+    "Cannabis Dispensary",
+    "Specialty Trade Contractor",
     "Drive-In Bank",
-    "Fast Food Restaurant",
+    "Fast Food Restaurant (without drive-through window)",
     "Free-Standing Discount Store",
     "Furniture Store",
-    "General Office Building (GFA of more than 5,000 sf)",
-    "General retail",
-    "Health and Fitness Club",
+    "Office - General Office Building (GFA of more than 10,000 sf)",
+    "Office - Small Office Building (GFA of less than 10,000 sf)",
+    "General Retail",
     "High Turnover Sit-Down Restaurant (<1 hr. turnover)",
     "Hospital",
     "Library",
-    "Light industrial",
-    "Medical –Dental Office Building",
+    "General Light Industrial",
+    "Medical-Dental Office Building",
     "Pharmacy/Drugstore",
-    "Quality Restaurant (>1 hr. turnover)",
+    "Fine Dining, previously Quality Restaurant (>1 hr. turnover)",
     "Recreational Community Center",
     "Supermarket",
     "Warehouse",
@@ -63,7 +65,7 @@ KSF_USES = {
 }
 
 SCHOOL_USES = {
-    "University/College",
+    "Junior/Community College",
     "High School",
     "Middle School/Junior High School",
     "Elementary School",
@@ -77,19 +79,21 @@ COMMERCIAL_NO_SOS = {
     "Auto Parts and Service Center",
     "Automobile Sales",
     "Building Materials/Lumber",
-    "Drinking Place",
+    "Brewery Taproom",
+    "Cannabis Dispensary",
+    "Specialty Trade Contractor",
     "Drive-In Bank",
-    "Fast Food Restaurant",
+    "Fast Food Restaurant (without drive-through window)",
     "Free-Standing Discount Store",
     "Furniture Store",
-    "General Office Building (GFA of more than 5,000 sf)",
-    "General retail",
-    "Health and Fitness Club",
+    "Office - General Office Building (GFA of more than 10,000 sf)",
+    "Office - Small Office Building (GFA of less than 10,000 sf)",
+    "General Retail",
     "High Turnover Sit-Down Restaurant (<1 hr. turnover)",
-    "Light industrial",
-    "Medical –Dental Office Building",
+    "General Light Industrial",
+    "Medical-Dental Office Building",
     "Pharmacy/Drugstore",
-    "Quality Restaurant (>1 hr. turnover)",
+    "Fine Dining, previously Quality Restaurant (>1 hr. turnover)",
     "Supermarket",
     "Warehouse",
 }
@@ -605,7 +609,7 @@ class PIACalculator:
             has_res_or_tau = any(
                 lu in (RESIDENTIAL_TYPES | TAU_TYPES) for lu in land_uses
             )
-            has_retail = "General retail" in land_uses
+            has_retail = "General Retail" in land_uses
             total_vmt = sum(r["net_vmt"] for r in lu_results)
             if has_res_or_tau and has_retail:
                 total_vmt *= 0.9

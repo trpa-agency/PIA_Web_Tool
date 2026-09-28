@@ -192,10 +192,10 @@ length_jur_full<-st_join(st_buffer(length_data_sf_full,.00001), st_buffer(jur %>
          threshold_15_below = jur_average * .85,
          percent_threshold=avg_zone_trip_length/threshold_15_below,
          cat=case_when(percent_threshold < .5 ~ "Less than 50% of threshold",
-                       between(percent_threshold,.5, .75) ~ "50-75% of threshold",
-                       between(percent_threshold,.751, .99999) ~ "75-100% of threshold",
-                       between(percent_threshold,1, 1.25) ~ "100-125% of threshold",
-                       between(percent_threshold,1.251, 1.5) ~ "125-150% of threshold",
+                       percent_threshold <= .75 ~ "50-75% of threshold",
+                       percent_threshold < 1 ~ "75-100% of threshold",
+                       percent_threshold <= 1.25 ~ "100-125% of threshold",
+                       percent_threshold <= 1.5 ~ "125-150% of threshold",
                        percent_threshold > 1.5 ~ "Over 150% of threshold"))
 
 length_jur<-st_join(st_buffer(length_data_sf,.00001), st_buffer(jur %>% dplyr::select("COUNTY"),.00001), largest=T) %>%
@@ -210,10 +210,10 @@ length_jur<-st_join(st_buffer(length_data_sf,.00001), st_buffer(jur %>% dplyr::s
          threshold_15_below = jur_average * .85,
          percent_threshold=avg_zone_trip_length/threshold_15_below,
          cat=case_when(percent_threshold < .5 ~ "Less than 50% of threshold",
-                       between(percent_threshold,.5, .75) ~ "50-75% of threshold",
-                       between(percent_threshold,.751, .99999) ~ "75-100% of threshold",
-                       between(percent_threshold,1, 1.25) ~ "100-125% of threshold",
-                       between(percent_threshold,1.251, 1.5) ~ "125-150% of threshold",
+                       percent_threshold <= .75 ~ "50-75% of threshold",
+                       percent_threshold <= 1 ~ "75-100% of threshold",
+                       percent_threshold <= 1.25 ~ "100-125% of threshold",
+                       percent_threshold <= 1.5 ~ "125-150% of threshold",
                        percent_threshold > 1.5 ~ "Over 150% of threshold"))
 
 
@@ -368,13 +368,13 @@ dataset_full <- length_jur_full %>% select(zone_id, zone_no, avg_zone_trip_lengt
 
 tau_types <- c("Hotel", "Motel","Timeshare")
 
-commercial_types <- c("Auto Parts and Service Center","Building Materials/Lumber","Drinking Place","Drive-In Bank","Fast Food Restaurant","Free-Standing Discount Store","Furniture Store","General retail","Health and Fitness Club","High Turnover Sit-Down Restaurant (<1 hr. turnover)","Hospital","Marina","Movie Theater (traditional)","Pharmacy/Drugstore","Quality Restaurant (>1 hr. turnover)","Supermarket")
+commercial_types <- c("Auto Parts and Service Center","Brewery Taproom","Building Materials/Lumber","Cannabis Dispensary","Drive-In Bank","Fast Food Restaurant (without drive-through window)","Fine Dining, previously Quality Restaurant (>1 hr. turnover)","Free-Standing Discount Store","Furniture Store","General Retail","High Turnover Sit-Down Restaurant (<1 hr. turnover)","Hospital","Marina","Pharmacy/Drugstore","Specialty Trade Contractor","Supermarket")
 
-office_types<- c("General Office Building (GFA of more than 5,000 sf)", "Medical –Dental Office Building","Warehouse","Light industrial" )
+office_types<- c("Office - General Office Building (GFA of more than 10,000 sf)","Office - Small Office Building (GFA of less than 10,000 sf)","Medical-Dental Office Building","Warehouse","General Light Industrial" )
 
-rec_types<- c("Golf Course","Marina","Health and Fitness Club","Public Park","Bowling Alley")
+rec_types<- c("Golf Course","Marina","Public Park","Bowling Alley")
 
-pub_serv_types <- c("Hospital", "Library","High School","Middle School/Junior High School","University/College","Recreational Community Center","Private School (K-12)","Church","Daycare Center","Elementary School")
+pub_serv_types <- c("Hospital", "Library","High School","Middle School/Junior High School","Junior/Community College","Recreational Community Center","Private School (K-12)","Church","Daycare Center","Elementary School")
 
 
 #### --------------------------- ####
@@ -1264,7 +1264,7 @@ mit_percent_final3<-reactive({
     }else if (input$land_use1 %in% c("Movie Theater (traditional)")){
       numericInput("screens1", "# of Screens",
                    value = 0)
-    }else if (input$land_use1 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if (input$land_use1 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       numericInput("students1", "# of Students",
                    value = 0)
     }else {
@@ -1303,7 +1303,7 @@ mit_percent_final3<-reactive({
     }else if (input$land_use2 %in% c("Movie Theater (traditional)")){
       numericInput("screens2", "# of Screens",
                    value = 0)
-    }else if (input$land_use2 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if (input$land_use2 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       numericInput("students2", "# of Students",
                    value = 0)
     }else {
@@ -1342,7 +1342,7 @@ mit_percent_final3<-reactive({
     }else if (input$land_use3 %in% c("Movie Theater (traditional)")){
       numericInput("screens3", "# of Screens",
                    value = 0)
-    }else if (input$land_use3 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if (input$land_use3 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       numericInput("students3", "# of Students",
                    value = 0)
     }else {
@@ -1381,7 +1381,7 @@ mit_percent_final3<-reactive({
     }else if (input$proj_type %in% c('Developed Campground/RV Park')){
       numericInput("sites", "# of Sites",
                    value = 0)
-    }else if (input$proj_type %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if (input$proj_type %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       numericInput("students", "# of Students",
                    value = 0)
     }else {
@@ -1414,7 +1414,7 @@ mit_percent_final3<-reactive({
     }else if (input$redevelopment=="Yes"){
       if (input$current_use %in% c("Residential (Market-Rate)","Residential (Affordable)")){
         numericInput("res_units_redev", "Existing Residential Units",value = 0)
-      } else if(input$current_use %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'General Office Building (GFA of more than 5,000 sf)', 'Medical –Dental Office Building', 'Light industrial', 'Warehouse', 'Automobile Sales',  'Health and Fitness Club', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')) {
+      } else if(input$current_use %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Office - General Office Building (GFA of more than 10,000 sf)', 'Office - Small Office Building (GFA of less than 10,000 sf)', 'Medical-Dental Office Building', 'General Light Industrial', 'Warehouse', 'Automobile Sales', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital', 'Specialty Trade Contractor')) {
         numericInput("ksf_redev", "Existing Square Footage",value = 0)
       }else if (input$current_use %in% c("Hotel","Motel","Timeshare")){
         numericInput("taus_redev", "Existing TAUS",value = 0)
@@ -1432,7 +1432,7 @@ mit_percent_final3<-reactive({
         numericInput("screens_redev", "# of Screens",value = 0)
       }else if (input$current_use %in% c('Developed Campground/RV Park')){
         numericInput("sites_redev", "# of Sites",value = 0)
-      }else if (input$current_use %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+      }else if (input$current_use %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
         numericInput("students_redev", "# of Students",value = 0)
         }
     }
@@ -1614,7 +1614,7 @@ mit_percent_final3<-reactive({
   })
 tot_vmt_react<-reactive({
   if(input$proj_type != "Mixed-Use"){
-    if(input$proj_type %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'General Office Building (GFA of more than 5,000 sf)', 'Medical –Dental Office Building', 'Light industrial', 'Warehouse', 'Automobile Sales',  'Health and Fitness Club', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
+    if(input$proj_type %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Office - General Office Building (GFA of more than 10,000 sf)', 'Office - Small Office Building (GFA of less than 10,000 sf)', 'Medical-Dental Office Building', 'General Light Industrial', 'Warehouse', 'Automobile Sales', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library','Specialty Trade Contractor', 'Hospital')){
       ((datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length)) * 
          ((input$ksf/1000) * (trip_rates %>% filter(use %in% input$proj_type) %>% select(Rate) %>% pull())) * mit_percent_final()) - display_vmt_redev()
     } else if(input$proj_type %in% c('Public Park')){
@@ -1629,7 +1629,7 @@ tot_vmt_react<-reactive({
     }else if(input$proj_type %in% c("Movie Theater (traditional)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$screens) * (trip_rates %>% filter(use == input$proj_type)  %>% pull(Rate))) * mit_percent_final()) - display_vmt_redev()
-    }else if(input$proj_type %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if(input$proj_type %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$students) * (trip_rates %>% filter(use == input$proj_type)  %>% pull(Rate))) * mit_percent_final()) - display_vmt_redev()
     }else if(input$proj_type %in% c('Marina')){
@@ -1650,7 +1650,7 @@ tot_vmt_react<-reactive({
          (input$input_custom_unit * input$input_custom_rate)) * mit_percent_final()) - display_vmt_redev()
     } 
   } else if(input$proj_type == "Mixed-Use"){
-    if(input$land_use1 %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'General Office Building (GFA of more than 5,000 sf)', 'Medical –Dental Office Building', 'Light industrial', 'Warehouse', 'Automobile Sales',  'Health and Fitness Club', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
+    if(input$land_use1 %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Office - General Office Building (GFA of more than 10,000 sf)', 'Office - Small Office Building (GFA of less than 10,000 sf)', 'Medical-Dental Office Building', 'General Light Industrial', 'Warehouse', 'Automobile Sales', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital', 'Specialty Trade Contractor')){
       ((datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length)) * 
          (input$ksf1/1000) * (trip_rates %>% filter(use %in% input$land_use1) %>% select(Rate) %>% pull())) * mit_percent_final1()
     } else if(input$land_use1 %in% c('Public Park')){
@@ -1665,7 +1665,7 @@ tot_vmt_react<-reactive({
     }else if(input$land_use1 %in% c("Movie Theater (traditional)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$screens1) * (trip_rates %>% filter(use == input$land_use1)  %>% pull(Rate)))) * mit_percent_final1()
-    }else if(input$land_use1 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if(input$land_use1 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$students1) * (trip_rates %>% filter(use == input$land_use1)  %>% pull(Rate)))) * mit_percent_final1()
     }else if(input$land_use1 %in% c('Marina')){
@@ -1689,7 +1689,7 @@ tot_vmt_react<-reactive({
 })
 tot_vmt_react_proposed<-reactive({
   if(input$proj_type != "Mixed-Use"){
-    if(input$proj_type %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'General Office Building (GFA of more than 5,000 sf)', 'Medical –Dental Office Building', 'Light industrial', 'Warehouse', 'Automobile Sales',  'Health and Fitness Club', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
+    if(input$proj_type %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Specialty Trade Contractor', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Office - General Office Building (GFA of more than 10,000 sf)', 'Office - Small Office Building (GFA of less than 10,000 sf)', 'Medical-Dental Office Building', 'General Light Industrial', 'Warehouse', 'Automobile Sales', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
       ((datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length)) * 
          ((input$ksf/1000) * (trip_rates %>% filter(use %in% input$proj_type) %>% select(Rate) %>% pull()))) 
     } else if(input$proj_type %in% c('Public Park')){
@@ -1704,7 +1704,7 @@ tot_vmt_react_proposed<-reactive({
     }else if(input$proj_type %in% c("Movie Theater (traditional)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$screens) * (trip_rates %>% filter(use == input$proj_type)  %>% pull(Rate)))) 
-    }else if(input$proj_type %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if(input$proj_type %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$students) * (trip_rates %>% filter(use == input$proj_type)  %>% pull(Rate))))
     }else if(input$proj_type %in% c('Marina')){
@@ -1725,7 +1725,7 @@ tot_vmt_react_proposed<-reactive({
           (input$input_custom_unit * input$input_custom_rate)))
     } 
   } else if(input$proj_type == "Mixed-Use"){
-    if(input$land_use1 %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'General Office Building (GFA of more than 5,000 sf)', 'Medical –Dental Office Building', 'Light industrial', 'Warehouse', 'Automobile Sales',  'Health and Fitness Club', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
+    if(input$land_use1 %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Specialty Trade Contractor', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Office - General Office Building (GFA of more than 10,000 sf)', 'Office - Small Office Building (GFA of less than 10,000 sf)', 'Medical-Dental Office Building', 'General Light Industrial', 'Warehouse', 'Automobile Sales', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
       ((datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length)) * 
          (input$ksf1/1000) * (trip_rates %>% filter(use %in% input$land_use1) %>% select(Rate) %>% pull())) 
     } else if(input$land_use1 %in% c('Public Park')){
@@ -1740,7 +1740,7 @@ tot_vmt_react_proposed<-reactive({
     }else if(input$land_use1 %in% c("Movie Theater (traditional)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$screens1) * (trip_rates %>% filter(use == input$land_use1)  %>% pull(Rate)))) 
-    }else if(input$land_use1 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if(input$land_use1 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$students1) * (trip_rates %>% filter(use == input$land_use1)  %>% pull(Rate)))) 
     }else if(input$land_use1 %in% c('Marina')){
@@ -1766,7 +1766,7 @@ tot_vmt_react2<-reactive({
   if(input$proj_type != "Mixed-Use"){
     return() 
   } else if(input$proj_type == "Mixed-Use"){
-    if(input$land_use2 %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'General Office Building (GFA of more than 5,000 sf)', 'Medical –Dental Office Building', 'Light industrial', 'Warehouse', 'Automobile Sales',  'Health and Fitness Club', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
+    if(input$land_use2 %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Specialty Trade Contractor', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Office - General Office Building (GFA of more than 10,000 sf)', 'Office - Small Office Building (GFA of less than 10,000 sf)', 'Medical-Dental Office Building', 'General Light Industrial', 'Warehouse', 'Automobile Sales', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
       ((datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length)) * 
          (input$ksf2/1000) * (trip_rates %>% filter(use %in% input$land_use2) %>% select(Rate) %>% pull())) * mit_percent_final2()
     } else if(input$land_use2 %in% c('Public Park')){
@@ -1784,7 +1784,7 @@ tot_vmt_react2<-reactive({
     }else if(input$land_use2 %in% c("Movie Theater (traditional)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$screens2) * (trip_rates %>% filter(use == input$land_use2)  %>% pull(Rate)))) * mit_percent_final2()
-    }else if(input$land_use2 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if(input$land_use2 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$students2) * (trip_rates %>% filter(use == input$land_use2)  %>% pull(Rate)))) * mit_percent_final2()
     }else if(input$land_use2 %in% c("Hotel","Motel","Timeshare")){
@@ -1807,7 +1807,7 @@ tot_vmt_react2_proposed<-reactive({
   if(input$proj_type != "Mixed-Use"){
     return() 
   } else if(input$proj_type == "Mixed-Use"){
-    if(input$land_use2 %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'General Office Building (GFA of more than 5,000 sf)', 'Medical –Dental Office Building', 'Light industrial', 'Warehouse', 'Automobile Sales',  'Health and Fitness Club', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
+    if(input$land_use2 %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Specialty Trade Contractor', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Office - General Office Building (GFA of more than 10,000 sf)', 'Office - Small Office Building (GFA of less than 10,000 sf)', 'Medical-Dental Office Building', 'General Light Industrial', 'Warehouse', 'Automobile Sales', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
       ((datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length)) * 
          (input$ksf2/1000) * (trip_rates %>% filter(use %in% input$land_use2) %>% select(Rate) %>% pull()))
     } else if(input$land_use2 %in% c('Public Park')){
@@ -1825,7 +1825,7 @@ tot_vmt_react2_proposed<-reactive({
     }else if(input$land_use2 %in% c("Movie Theater (traditional)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$screens2) * (trip_rates %>% filter(use == input$land_use2)  %>% pull(Rate)))) 
-    }else if(input$land_use2 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if(input$land_use2 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$students2) * (trip_rates %>% filter(use == input$land_use2)  %>% pull(Rate)))) 
     }else if(input$land_use2 %in% c("Hotel","Motel","Timeshare")){
@@ -1848,7 +1848,7 @@ tot_vmt_react3<-reactive({
   if(input$proj_type != "Mixed-Use"){
     return() 
   } else if(input$proj_type == "Mixed-Use"){
-    if(input$land_use3 %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'General Office Building (GFA of more than 5,000 sf)', 'Medical –Dental Office Building', 'Light industrial', 'Warehouse', 'Automobile Sales',  'Health and Fitness Club', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
+    if(input$land_use3 %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Specialty Trade Contractor', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Office - General Office Building (GFA of more than 10,000 sf)', 'Office - Small Office Building (GFA of less than 10,000 sf)', 'Medical-Dental Office Building', 'General Light Industrial', 'Warehouse', 'Automobile Sales', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
       ((datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length)) * 
          (input$ksf3/1000) * (trip_rates %>% filter(use %in% input$land_use3) %>% select(Rate) %>% pull())) * mit_percent_final3()
     } else if(input$land_use3 %in% c('Public Park')){
@@ -1866,7 +1866,7 @@ tot_vmt_react3<-reactive({
     }else if(input$land_use3 %in% c("Movie Theater (traditional)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$screens3) * (trip_rates %>% filter(use == input$land_use3)  %>% pull(Rate)))) * mit_percent_final3()
-    }else if(input$land_use3 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if(input$land_use3 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$students3) * (trip_rates %>% filter(use == input$land_use3)  %>% pull(Rate)))) * mit_percent_final3()
     }else if(input$land_use3 %in% c("Hotel","Motel","Timeshare")){
@@ -1889,7 +1889,7 @@ tot_vmt_react3_proposed<-reactive({
   if(input$proj_type != "Mixed-Use"){
     return() 
   } else if(input$proj_type == "Mixed-Use"){
-    if(input$land_use3 %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'General Office Building (GFA of more than 5,000 sf)', 'Medical –Dental Office Building', 'Light industrial', 'Warehouse', 'Automobile Sales',  'Health and Fitness Club', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
+    if(input$land_use3 %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Specialty Trade Contractor', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Office - General Office Building (GFA of more than 10,000 sf)', 'Office - Small Office Building (GFA of less than 10,000 sf)', 'Medical-Dental Office Building', 'General Light Industrial', 'Warehouse', 'Automobile Sales', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
       ((datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length)) * 
          (input$ksf3/1000) * (trip_rates %>% filter(use %in% input$land_use3) %>% select(Rate) %>% pull())) 
     } else if(input$land_use3 %in% c('Public Park')){
@@ -1907,7 +1907,7 @@ tot_vmt_react3_proposed<-reactive({
     }else if(input$land_use3 %in% c("Movie Theater (traditional)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$screens3) * (trip_rates %>% filter(use == input$land_use3)  %>% pull(Rate))))
-    }else if(input$land_use3 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if(input$land_use3 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$students3) * (trip_rates %>% filter(use == input$land_use3)  %>% pull(Rate)))) 
     }else if(input$land_use3 %in% c("Hotel","Motel","Timeshare")){
@@ -1934,7 +1934,7 @@ tot_vmt_react_redev<-reactive({
   if(input$proj_type == "Mixed-Use"){
     return() 
   } else if(input$proj_type != "Mixed-Use"){
-    if(input$current_use %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'General Office Building (GFA of more than 5,000 sf)', 'Medical –Dental Office Building', 'Light industrial', 'Warehouse', 'Automobile Sales',  'Health and Fitness Club', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
+    if(input$current_use %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Specialty Trade Contractor', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Office - General Office Building (GFA of more than 10,000 sf)', 'Office - Small Office Building (GFA of less than 10,000 sf)', 'Medical-Dental Office Building', 'General Light Industrial', 'Warehouse', 'Automobile Sales', 'Recreational Community Center',  'Church', 'Daycare Center', 'Library', 'Hospital')){
       ((datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length)) * 
          (input$ksf_redev/1000) * (trip_rates %>% filter(use %in% input$current_use) %>% select(Rate) %>% pull()))
     } else if(input$current_use %in% c('Public Park')){
@@ -1952,7 +1952,7 @@ tot_vmt_react_redev<-reactive({
     }else if(input$current_use %in% c("Movie Theater (traditional)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$screens_redev) * (trip_rates %>% filter(use == input$current_use)  %>% pull(Rate))))
-    }else if(input$current_use %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if(input$current_use %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       (datasetInput() %>% filter(zone_id==map_event()) %>% pull(avg_zone_trip_length) * 
          ((input$students_redev) * (trip_rates %>% filter(use == input$current_use)  %>% pull(Rate))) )
     }else if(input$current_use %in% c("Hotel","Motel","Timeshare")){
@@ -1987,7 +1987,7 @@ proj_sos_react<-reactive({
  # req(input$map_shape_click)
     if (screened() =="Yes") {
       0
-    } else if(input$proj_type %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Automobile Sales', 'Health and Fitness Club',"General Office Building (GFA of more than 5,000 sf)","Medical –Dental Office Building","Light industrial","Warehouse")){
+    } else if(input$proj_type %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Specialty Trade Contractor', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Automobile Sales',"Office - General Office Building (GFA of more than 10,000 sf)", "Office - Small Office Building (GFA of less than 10,000 sf)","Medical-Dental Office Building","General Light Industrial","Warehouse")){
     #round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
            # ((input$ksf/1000) * (trip_rates %>% filter(use == input$proj_type)  %>% pull(Rate))),0)
       0
@@ -2013,7 +2013,7 @@ proj_sos_react<-reactive({
    # round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
            # (input$screens * trip_rates %>% filter(use %in% input$proj_type) %>% select(Rate) %>% pull()),0)
     0
-  }else if(input$proj_type %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+  }else if(input$proj_type %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
     round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
             (input$students * trip_rates %>% filter(use %in% input$proj_type) %>% select(Rate) %>% pull()),0)
   }else if(input$proj_type %in% c("Hotel","Motel","Timeshare")){
@@ -2033,7 +2033,7 @@ proj_sos_react<-reactive({
   } else if(input$proj_type == "Mixed-Use"){
     if (screened() =="Yes") {
       0
-    } else if(input$land_use1 %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store',  'Automobile Sales', 'Health and Fitness Club',"General Office Building (GFA of more than 5,000 sf)","Medical –Dental Office Building","Light industrial","Warehouse")){
+    } else if(input$land_use1 %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Specialty Trade Contractor', 'Building Materials/Lumber', 'Free-Standing Discount Store',  'Automobile Sales',"Office - General Office Building (GFA of more than 10,000 sf)", "Office - Small Office Building (GFA of less than 10,000 sf)","Medical-Dental Office Building","General Light Industrial","Warehouse")){
       #round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
       # ((input$ksf/1000) * (trip_rates %>% filter(use == input$proj_type)  %>% pull(Rate))),0)
       0
@@ -2059,7 +2059,7 @@ proj_sos_react<-reactive({
       # round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
       # (input$screens * trip_rates %>% filter(use %in% input$proj_type) %>% select(Rate) %>% pull()),0)
       0
-    }else if(input$land_use1 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+    }else if(input$land_use1 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
       round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
               (input$students1 * trip_rates %>% filter(use %in% input$land_use1) %>% select(Rate) %>% pull()),0)
     }else if(input$land_use1 %in% c("Hotel","Motel","Timeshare")){
@@ -2082,7 +2082,7 @@ proj_sos_react2<-reactive({
   # req(input$map_shape_click)
   if (screened2() =="Yes") {
     0
-  } else if(input$land_use2 %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store',  'Light industrial', 'Warehouse', 'Automobile Sales', 'Health and Fitness Club',"General Office Building (GFA of more than 5,000 sf)","Medical –Dental Office Building")){
+  } else if(input$land_use2 %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Specialty Trade Contractor', 'Building Materials/Lumber', 'Free-Standing Discount Store',  'General Light Industrial', 'Warehouse', 'Automobile Sales',"Office - General Office Building (GFA of more than 10,000 sf)", "Office - Small Office Building (GFA of less than 10,000 sf)","Medical-Dental Office Building")){
     #round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
     # ((input$ksf/1000) * (trip_rates %>% filter(use == input$proj_type)  %>% pull(Rate))),0)
     0
@@ -2108,7 +2108,7 @@ proj_sos_react2<-reactive({
     # round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
     # (input$screens * trip_rates %>% filter(use %in% input$proj_type) %>% select(Rate) %>% pull()),0)
     0
-  }else if(input$land_use2%in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+  }else if(input$land_use2%in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
     round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
             (input$students2 * trip_rates %>% filter(use %in% input$land_use2) %>% select(Rate) %>% pull()),0)
   }else if(input$land_use2 %in% c("Hotel","Motel","Timeshare")){
@@ -2132,7 +2132,7 @@ proj_sos_react3<-reactive({
   # req(input$map_shape_click)
   if (screened3() =="Yes") {
     0
-  } else if(input$land_use2 %in% c('Auto Parts and Service Center','General retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant', 'Quality Restaurant (>1 hr. turnover)', 'Drinking Place', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Automobile Sales', 'Health and Fitness Club',"General Office Building (GFA of more than 5,000 sf)","Medical –Dental Office Building","Light industrial","Warehouse")){
+  } else if(input$land_use2 %in% c('Auto Parts and Service Center','General Retail', 'Furniture Store', 'Pharmacy/Drugstore', 'Supermarket', 'Drive-In Bank', 'High Turnover Sit-Down Restaurant (<1 hr. turnover)', 'Fast Food Restaurant (without drive-through window)', 'Fine Dining, previously Quality Restaurant (>1 hr. turnover)', 'Brewery Taproom', 'Cannabis Dispensary', 'Specialty Trade Contractor', 'Building Materials/Lumber', 'Free-Standing Discount Store', 'Automobile Sales',"Office - General Office Building (GFA of more than 10,000 sf)", "Office - Small Office Building (GFA of less than 10,000 sf)","Medical-Dental Office Building","General Light Industrial","Warehouse")){
     #round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
     # ((input$ksf/1000) * (trip_rates %>% filter(use == input$proj_type)  %>% pull(Rate))),0)
     0
@@ -2158,7 +2158,7 @@ proj_sos_react3<-reactive({
     # round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
     # (input$screens * trip_rates %>% filter(use %in% input$proj_type) %>% select(Rate) %>% pull()),0)
     0
-  }else if(input$land_use3%in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+  }else if(input$land_use3%in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
     round(datasetInput() %>% filter(zone_id==map_event()) %>% pull(threshold_15_below) * 
             (input$students3 * trip_rates %>% filter(use %in% input$land_use3) %>% select(Rate) %>% pull()),0)
   }else if(input$land_use3 %in% c("Hotel","Motel","Timeshare")){
@@ -2378,23 +2378,23 @@ output$mobility_fee <-renderValueBox({
   })
   tot_mixed_use_vmt<-reactive({
     if (
-      (input$land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use2 %in% c("General retail")) |
-      (input$land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use3 %in% c("General retail")) |
-      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use1 %in% c("General retail")) |
-      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use3 %in% c("General retail")) |
-      (input$land_use3 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use1 %in% c("General retail")) |
-      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use2 %in% c("General retail"))
+      (input$land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use2 %in% c("General Retail")) |
+      (input$land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use3 %in% c("General Retail")) |
+      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use1 %in% c("General Retail")) |
+      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use3 %in% c("General Retail")) |
+      (input$land_use3 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use1 %in% c("General Retail")) |
+      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use2 %in% c("General Retail"))
     ){ (tot_vmt_react3() + tot_vmt_react2() + tot_vmt_react()) * .9
     } else{tot_vmt_react3() + tot_vmt_react2() + tot_vmt_react()}
   })
   tot_mixed_use_fee<-reactive({
     if (
-      (input$land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use2 %in% c("General retail")) |
-      (input$land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use3 %in% c("General retail")) |
-      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use1 %in% c("General retail")) |
-      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use3 %in% c("General retail")) |
-      (input$land_use3 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use1 %in% c("General retail")) |
-      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use2 %in% c("General retail"))
+      (input$land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use2 %in% c("General Retail")) |
+      (input$land_use1 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use3 %in% c("General Retail")) |
+      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use1 %in% c("General Retail")) |
+      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use3 %in% c("General Retail")) |
+      (input$land_use3 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use1 %in% c("General Retail")) |
+      (input$land_use2 %in% c("Residential (Market-Rate)","Residential (Affordable)","Timeshare","Hotel","Motel") & input$land_use2 %in% c("General Retail"))
     ){ ((round(tot_vmt_react3() + tot_vmt_react2() + tot_vmt_react(),0)) * .9) * 55.44
     } else{(round(tot_vmt_react3() + tot_vmt_react2() + tot_vmt_react(),0)) * 55.44}
   })
@@ -2561,7 +2561,7 @@ units1 <- reactive({
     "Lanes"
   }else if (input$land_use1 %in% c("Movie Theater (traditional)")){
     "Screens"
-  }else if (input$land_use1 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-11)")){
+  }else if (input$land_use1 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
     "Students"
   }else {
     "Square Feet"
@@ -2589,7 +2589,7 @@ units2 <- reactive({
     "Lanes"
   }else if (input$land_use2 %in% c("Movie Theater (traditional)")){
     "Screens"
-  }else if (input$land_use2 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+  }else if (input$land_use2 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
     "Students"
   }else {
     "Square Feet"
@@ -2617,7 +2617,7 @@ units3 <- reactive({
     "Lanes"
   }else if (input$land_use3 %in% c("Movie Theater (traditional)")){
     "Screens"
-  }else if (input$land_use3 %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+  }else if (input$land_use3 %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
     "Students"
   }else {
     "Square Feet"
@@ -2643,7 +2643,7 @@ units <- reactive({
     "Lanes"
   }else if (input$proj_type %in% c("Movie Theater (traditional)")){
     "Screens"
-  }else if (input$proj_type %in% c("University/College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
+  }else if (input$proj_type %in% c("Junior/Community College","High School","Middle School/Junior High School","Elementary School","Private School (K-12)")){
     "Students"
   }else if (input$proj_type %in% c("Mixed-Use")){
     " "

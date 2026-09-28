@@ -1,40 +1,41 @@
-﻿code,use,ITE Code,Rate,Variable,Flag
-TRPA10,Single-Family Detached,210,9.43,DU,
-TRPA11,"Multi-Family (low-rise, one or two levels)",220,6.74,DU,
-TRPA17,Senior Adult Housing – Attached,252,3.24,DU,
-TRPA18,Congregate Care Facility (Residential Care),253,2.21,DU,
-TRPA20,Hotel,310,7.99,Units,
-TRPA23,Motel,320,3.35,Units,
-TRPA14,Timeshare,265,8.63,Units,
-LA11,General retail,820,37.01,KSF,
-TRPA101,Furniture Store,890,6.3,KSF,
-TRPA99,Pharmacy/Drugstore,880,90.08,KSF,
-TRPA92,Supermarket,850,93.84,KSF,
-TRPA102,Drive-In Bank,912,100.35,KSF,
-TRPA107,High Turnover Sit-Down Restaurant (<1 hr. turnover),932,107.2,KSF,
-TRPA108,Fast Food Restaurant,933,450.49,KSF,
-TRPA106,Quality Restaurant (>1 hr. turnover),931,83.84,KSF,
-TRPA103,Drinking Place,925,11.36,KSF,
-TRPA89,Auto Parts and Service Center,943,16.6,KSF,
-TRPA77,Building Materials/Lumber,812,17.05,KSF,
-TRPA79,Free-Standing Discount Store,815,53.87,KSF,
-TRPA63,"General Office Building (GFA of more than 5,000 sf)",710,10.84,KSF,
-TRPA67,Medical –Dental Office Building,720,36,KSF,
-LA26,Light industrial,110,4.87,KSF,
-LA28,Warehouse,151,1.71,KSF,
-TRPA31,Public Park,411,0.78,Acres,
-TRPA33,Marina,420,2.41,Berths,Limited Sample Size
-TRPA34,Golf Course,430,30.38,Holes,
-TRPA35,Bowling Alley,437,1.48,Bowling Lanes,Insufficient Data
-TRPA36,Movie Theater (traditional),444,220,Movie Screens,Limited Sample Size
-TRPA41,Health and Fitness Club,492,38.97,KSF,Insufficient Data
-TRPA43,Recreational Community Center,495,28.82,KSF,
-TRPA52,University/College,550,1.15,Students,
-TRPA46,High School,530,1.94,Students,
-TRPA45,Middle School/Junior High School,522,2.1,Students,
-TRPA44,Elementary School,520,2.27,Students,
-TRPA48,Private School (K-12),536,2.48,Students,Insufficient Data
-TRPA53,Church,560,7.6,KSF,
-TRPA56,Daycare Center,565,47.62,KSF,
-TRPA58,Library,590,72.05,KSF,
-TRPA59,Hospital,610,10.77,KSF,
+﻿code,use,ITE Code,Rate,Variable,Flag,Status,Previous Rate
+TRPA89,Auto Parts and Service Center,943,16.6,KSF,,0,
+TRPA35,Bowling Alley,437,1.48,Bowling Lanes,Insufficient Data,Same,
+TRPA109,Brewery Taproom,971,61.69,KSF,,Added,
+TRPA77,Building Materials/Lumber,812,11.7,KSF,,Changed,17.05
+TRPA110,Cannabis Dispensary,882,227.76,KSF,,Added,
+TRPA53,Church,560,6.78,KSF,,Changed,7.6
+TRPA18,Congregate Care Facility (Residential Care),253,2.43,DU,,Changed,2.21
+TRPA56,Daycare Center,565,39.3,KSF,,Changed,47.62
+TRPA102,Drive-In Bank,912,98.85,KSF,,Changed,100.35
+TRPA44,Elementary School,520,2.27,Students,,Same,
+TRPA108,Fast Food Restaurant (without drive-through window),933,413.41,KSF,,Changed,450.49
+TRPA106,"Fine Dining, previously Quality Restaurant (>1 hr. turnover)",931,79.03,KSF,,Changed,83.84
+TRPA79,Free-Standing Discount Store,815,53.87,KSF,,Same,
+TRPA101,Furniture Store,890,6.32,KSF,,Changed,6.3
+LA26,General Light Industrial,110,3.6,KSF,,Changed,4.87
+LA11,General Retail,820,36.39,KSF,,Changed,37.01
+TRPA34,Golf Course,430,30.38,Holes,,Same,
+TRPA46,High School,525,1.94,Students,,Same,
+TRPA107,High Turnover Sit-Down Restaurant (<1 hr. turnover),932,103.75,KSF,,Changed,107.2
+TRPA59,Hospital,610,10.7,KSF,,Changed,10.77
+TRPA20,Hotel,310,5.84,Units,,Changed,7.99
+TRPA52,Junior/Community College,540,1.15,Students,,Same,
+TRPA58,Library,590,72.05,KSF,,Same,
+TRPA33,Marina,420,2.41,Berths,Limited Sample Size,Same,
+TRPA67,Medical-Dental Office Building,720,34.03,KSF,,Changed,36
+TRPA45,Middle School/Junior High School,522,2.09,Students,,Changed,2.1
+TRPA23,Motel,320,3.35,Units,,Same,
+TRPA11,"Multi-Family (low-rise, one or two levels)",220,6.21,DU,,Changed,6.74
+TRPA63,"Office - General Office Building (GFA of more than 10,000 sf)",710,7.83,KSF,,Changed,10.84
+TRPA112,"Office - Small Office Building (GFA of less than 10,000 sf)",712,14.39,KSF,,Added,
+TRPA99,Pharmacy/Drugstore,880,90.08,KSF,,Same,
+TRPA48,Private School (K-12),532,1.74,Students,Insufficient Data,Changed,2.48
+TRPA31,Public Park,411,0.78,Acres,,Same,
+TRPA43,Recreational Community Center,495,28.82,KSF,,Same,
+TRPA17,Senior Adult Housing - Attached,252,3.25,DU,,Changed,3.24
+TRPA10,Single-Family Detached,210,9.09,DU,,Changed,9.43
+TRPA113,Specialty Trade Contractor,180,9.82,KSF,,Added,
+TRPA92,Supermarket,850,92.29,KSF,,Changed,93.84
+TRPA14,Timeshare,265,10.03,Units,,Changed,8.63
+TRPA28,Warehouse,150,1.38,KSF,,Changed,1.71
