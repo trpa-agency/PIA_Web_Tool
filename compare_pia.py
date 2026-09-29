@@ -81,15 +81,15 @@ CASES = [
     # ---- Commercial KSF (no SOS) -------------------------------------------
     {"label": "General retail 1000 sqft Zone12",
      "zone_id": "Zone 12", "in_town_center": True,  "in_transit": True,
-     "proj_type": "General retail", "quantity": 1_000},
+     "proj_type": "General Retail", "quantity": 1_000},
 
     {"label": "General retail 20000 sqft Zone5 no-TC",
      "zone_id": "Zone 5",  "in_town_center": False, "in_transit": False,
-     "proj_type": "General retail", "quantity": 20_000},
+     "proj_type": "General Retail", "quantity": 20_000},
 
     {"label": "Fast Food Restaurant 3000 sqft Zone5",
      "zone_id": "Zone 5",  "in_town_center": False, "in_transit": False,
-     "proj_type": "Fast Food Restaurant", "quantity": 3_000},
+     "proj_type": "Fast Food Restaurant (without drive-through window)", "quantity": 3_000},
 
     {"label": "Supermarket 25000 sqft Zone5",
      "zone_id": "Zone 5",  "in_town_center": False, "in_transit": False,
@@ -97,7 +97,7 @@ CASES = [
 
     {"label": "General Office 10000 sqft Zone12",
      "zone_id": "Zone 12", "in_town_center": True,  "in_transit": True,
-     "proj_type": "General Office Building (GFA of more than 5,000 sf)", "quantity": 10_000},
+     "proj_type": "Office - General Office Building (GFA of more than 10,000 sf)", "quantity": 10_000},
 
     # ---- Public service KSF (has SOS) --------------------------------------
     {"label": "Library 2000 sqft Zone12",
@@ -157,7 +157,7 @@ CASES = [
 
     {"label": "Office 20ksf CTR-Required 60% emp 80% elig Zone5",
      "zone_id": "Zone 5",  "in_town_center": False, "in_transit": False,
-     "proj_type": "General Office Building (GFA of more than 5,000 sf)",
+     "proj_type": "Office - General Office Building (GFA of more than 10,000 sf)",
      "quantity": 20_000,
      "mitigations": ["Employee Shuttle",
                      "Implement CTR Program -  Required Implementation/Monitoring"],
@@ -165,14 +165,14 @@ CASES = [
 
     {"label": "Retail 10ksf Unbundle+TrafficCalm Zone12",
      "zone_id": "Zone 12", "in_town_center": True,  "in_transit": True,
-     "proj_type": "General retail", "quantity": 10_000,
+     "proj_type": "General Retail", "quantity": 10_000,
      "mitigations": ["Unbundle Parking Costs from Property Cost", "Traffic Calming"]},
 
     # ---- Redevelopment -----------------------------------------------------
     {"label": "Retail 10ksf replacing 5ksf Zone12",
      "zone_id": "Zone 12", "in_town_center": True,  "in_transit": True,
-     "proj_type": "General retail", "quantity": 10_000,
-     "redevelopment": True, "current_use": "General retail", "current_quantity": 5_000},
+     "proj_type": "General Retail", "quantity": 10_000,
+     "redevelopment": True, "current_use": "General Retail", "current_quantity": 5_000},
 
     {"label": "Res MR 20du replacing 10du Zone5",
      "zone_id": "Zone 5",  "in_town_center": False, "in_transit": False,

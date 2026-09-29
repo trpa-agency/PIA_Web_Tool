@@ -5,8 +5,9 @@ account: trpa
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4286084
-bundleId: 11620535
+bundleId: 12618901
 url: https://trpa.shinyapps.io/PIA_Tool/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
+ignoredFiles: .claude/settings.json

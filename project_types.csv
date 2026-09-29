@@ -1,40 +1,45 @@
-"project_type"
-"Auto Parts and Service Center"
-"Bowling Alley"
-"Building Materials/Lumber"
-"Church"
-"Daycare Center"
-"Developed Campground/RV Park"
-"Drinking Place"
-"Drive-In Bank"
-"Elementary School"
-"Fast Food Restaurant"
-"Free-Standing Discount Store"
-"Furniture Store"
-"General Office Building (GFA of more than 5,000 sf)"
-"General retail"
-"Golf Course"
-"Health and Fitness Club"
-"High School"
-"High Turnover Sit-Down Restaurant (<1 hr. turnover)"
-"Hospital"
-"Hotel"
-"Library"
-"Light industrial"
-"Marina"
-"Medical –Dental Office Building"
-"Middle School/Junior High School"
-"Mixed-Use"
-"Motel"
-"Movie Theater (traditional)"
-"Pharmacy/Drugstore"
-"Private School (K-12)"
-"Public Park"
-"Quality Restaurant (>1 hr. turnover)"
-"Recreational Community Center"
-"Residential"
-"Supermarket"
-"Timeshare"
-"Unique Project Type"
-"University/College"
-"Warehouse"
+project_type
+Auto Parts and Service Center
+Bowling Alley
+Brewery Taproom
+Building Materials/Lumber
+Cannabis Dispensary
+Church
+Congregate Care Facility (Residential Care)
+Daycare Center
+Drive-In Bank
+Elementary School
+Fast Food Restaurant (without drive-through window)
+"Fine Dining, previously Quality Restaurant (>1 hr. turnover)"
+Free-Standing Discount Store
+Furniture Store
+General Light Industrial
+General Retail
+Golf Course
+High School
+High Turnover Sit-Down Restaurant (<1 hr. turnover)
+Hospital
+Hotel
+Junior/Community College
+Library
+Marina
+Medical-Dental Office Building
+Middle School/Junior High School
+Mixed-Use
+Motel
+"Multi-Family (low-rise, one or two levels)"
+"Office - General Office Building (GFA of more than 10,000 sf)"
+"Office - Small Office Building (GFA of less than 10,000 sf)"
+Pharmacy/Drugstore
+Private School (K-12)
+Public Park
+Recreational Community Center
+Residential (Affordable)
+Residential (Market-Rate)
+Senior Adult Housing - Attached
+Single-Family Detached
+Specialty Trade Contractor
+Supermarket
+Timeshare
+Unique Project Type
+Warehouse
